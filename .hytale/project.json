@@ -1,0 +1,10 @@
+{
+  "groupId": "me.jomi",
+  "artifactId": "hyspellengine",
+  "modName": "HySpellEngine",
+  "version": "1.0.0",
+  "buildSystem": "Maven",
+  "language": "Java",
+  "jarPath": "target/hyspellengine-1.0.0.jar",
+  "buildTask": "package"
+}

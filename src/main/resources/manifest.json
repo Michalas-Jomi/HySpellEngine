@@ -1,0 +1,10 @@
+{
+  "Group": "me.jomi",
+  "Name": "HySpellEngine",
+  "Version": "1.0.0",
+  "Description": "Hytale rpg mod with api.\nContains category, experience and spells systems.",
+  "Authors": [{"Name": "Jomi"}],
+  "Main": "me.jomi.hyspellengine.HySpellEnginePlugin",
+  "LoadOrder": "POSTWORLD",
+  "IncludesAssetPack": true
+}
