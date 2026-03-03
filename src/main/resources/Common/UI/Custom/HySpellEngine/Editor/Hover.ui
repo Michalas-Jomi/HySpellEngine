@@ -1,0 +1,16 @@
+// Hytale UI Definition: Hover.ui
+// Controller: Hover.uiController.java
+
+Group #Hover {
+  Label #Title {
+    Text: "Description";
+    Anchor: (Height: 32);
+    Style: (
+      FontSize: 14,
+      TextColor: #ffffff,
+      HorizontalAlignment: Center
+    );
+  }
+
+  // Add your UI components here
+}

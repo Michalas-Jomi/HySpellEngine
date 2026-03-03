@@ -1,0 +1,10 @@
+$C = "../../Common.ui";
+$E = "EditorEntry.ui";
+
+$E.@Entry {
+  #InputConainer {
+    $C.@CheckBox #FieldInput {
+      Anchor: (Width: 32, Height: 32);
+    }
+  }
+}

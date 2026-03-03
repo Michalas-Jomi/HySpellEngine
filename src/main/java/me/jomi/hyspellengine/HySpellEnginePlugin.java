@@ -46,4 +46,15 @@ public class HySpellEnginePlugin extends JavaPlugin {
         LOGGER.at(Level.INFO).log("[HySpellEngine] Shutting down...");
         instance = null;
     }
+
+
+    public static void log(String msg) {
+        LOGGER.at(Level.INFO).log(msg);
+    }
+    public static void warn(String msg) {
+        LOGGER.at(Level.WARNING).log(msg);
+    }
+    public static void error(String msg) {
+        LOGGER.at(Level.SEVERE).log(msg);
+    }
 }

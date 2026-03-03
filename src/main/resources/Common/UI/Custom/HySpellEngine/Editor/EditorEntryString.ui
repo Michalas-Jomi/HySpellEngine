@@ -1,0 +1,17 @@
+$E = "EditorEntry.ui";
+
+$E.@Entry {
+  #InputConainer {
+    CompactTextField #FieldInput {
+      Style: (
+        TextColor: #ffffff,
+        FontSize: 16
+      );
+      PlaceholderText: "insert {fieldDisplayName}";
+      Value: "{value}";
+
+      CollapsedWidth: 100;
+      ExpandedWidth: 600;
+    }
+  }
+}
