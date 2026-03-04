@@ -2,6 +2,7 @@ package me.jomi.hyspellengine.api;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.codec.codecs.EnumCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
@@ -23,46 +24,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class Spell {
-    public final class SpellComponent implements Component<EntityStore> {
-        public static final BuilderCodec<SpellComponent> CODEC = EasyCodec.create(SpellComponent.class);
-        public static ComponentType<EntityStore, SpellComponent> getComponentType() {
-            return HySpellEnginePlugin.getInstance().getComponentType(SpellComponent.class);
-        }
-
-        //     spells      extra
-        // Map<String, Map<String, BsonValue>>
-        @EasyCodec.ForCodec public BsonDocument spells = new BsonDocument();
-
-        public void addSpell(@NonNullDecl Spell spell, @NullableDecl BsonDocument extra) {
-            if (extra == null)
-                extra = new BsonDocument();
-
-            this.spells.put(spell.getName(), extra);
-        }
-        public boolean removeSpell(@NonNullDecl Spell spell) {
-            return this.spells.remove(spell.getName()) != null;
-        }
-        public boolean hasSpell(@NonNullDecl Spell spell) {
-            return this.spells.containsKey(spell.getName());
-        }
-
-        private BsonDocument getExtra(@NonNullDecl Spell spell) {
-            return spells.get(spell.getName()).asDocument();
-        }
-        public BsonValue getExtra(Spell spell, String key) {
-            return this.getExtra(spell).get(key);
-        }
-        public void setExtra(Spell spell, String key, BsonValue value) {
-            this.getExtra(spell).put(key, value);
-        }
-
-        @Override
-        public Component<EntityStore> clone() {
-            SpellComponent copy = new SpellComponent();
-            copy.spells = this.spells.clone();
-            return copy;
-        }
-    }
     private final String name;
     private final String description;
     private final Map<String, SpellField<?>> fields = new ConcurrentHashMap<>();
@@ -76,49 +37,49 @@ public abstract class Spell {
     public abstract void unapply(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store);
 
     public boolean has(Ref<EntityStore> ref, Store<EntityStore> store) {
-        SpellComponent component = store.getComponent(ref, SpellComponent.getComponentType());
+        SpellContext.SpellComponent component = store.getComponent(ref, SpellContext.SpellComponent.getComponentType());
         return component != null && component.hasSpell(this);
     }
 
 
     @NullableDecl
-    public BsonValue getExtra(Ref<EntityStore> ref, Store<EntityStore> store, String key) {
+    public BsonValue getExtra(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, String key) {
         if (!this.has(ref, store))
             return null;
-        SpellComponent component = store.getComponent(ref, SpellComponent.getComponentType());
-        return component.getExtra(this, key);
+        SpellContext.SpellComponent component = store.getComponent(ref, SpellContext.SpellComponent.getComponentType());
+        return component.getExtra(context, key);
     }
-    public void setExtra(Ref<EntityStore> ref, Store<EntityStore> store, String key, BsonValue value) {
+    public void setExtra(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, String key, BsonValue value) {
         if (!this.has(ref, store))
             throw new IllegalArgumentException("Cannot set extra data for unlearned spell use spell.has() before spell.setExtra()");
-        SpellComponent component = store.getComponent(ref, SpellComponent.getComponentType());
-        component.setExtra(this, key, value);
+        SpellContext.SpellComponent component = store.getComponent(ref, SpellContext.SpellComponent.getComponentType());
+        component.setExtra(context, key, value);
     }
 
-    public String  getExtraString( Ref<EntityStore> ref, Store<EntityStore> store, String key) {
-        return this.getExtra(ref, store, key).asString().getValue();
+    public String  getExtraString( SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, String key) {
+        return this.getExtra(context, ref, store, key).asString().getValue();
     }
-    public int     getExtraInt(    Ref<EntityStore> ref, Store<EntityStore> store, String key) {
-        return this.getExtra(ref, store, key).asInt32().getValue();
+    public int     getExtraInt(    SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, String key) {
+        return this.getExtra(context, ref, store, key).asInt32().getValue();
     }
-    public double  getExtraDouble( Ref<EntityStore> ref, Store<EntityStore> store, String key) {
-        return this.getExtra(ref, store, key).asDouble().getValue();
+    public double  getExtraDouble( SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, String key) {
+        return this.getExtra(context, ref, store, key).asDouble().getValue();
     }
-    public boolean getExtraBoolean(Ref<EntityStore> ref, Store<EntityStore> store, String key) {
-        return this.getExtra(ref, store, key).asBoolean().getValue();
+    public boolean getExtraBoolean(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, String key) {
+        return this.getExtra(context, ref, store, key).asBoolean().getValue();
     }
 
-    public void setExtra(Ref<EntityStore> ref, Store<EntityStore> store, String key, String value) {
-        this.setExtra(ref, store, key, new BsonString(value));
+    public void setExtra(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, String key, String value) {
+        this.setExtra(context, ref, store, key, new BsonString(value));
     }
-    public void setExtra(Ref<EntityStore> ref, Store<EntityStore> store, String key, int value) {
-        this.setExtra(ref, store, key, new BsonInt32(value));
+    public void setExtra(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, String key, int value) {
+        this.setExtra(context, ref, store, key, new BsonInt32(value));
     }
-    public void setExtra(Ref<EntityStore> ref, Store<EntityStore> store, String key, double value) {
-        this.setExtra(ref, store, key, new BsonDouble(value));
+    public void setExtra(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, String key, double value) {
+        this.setExtra(context, ref, store, key, new BsonDouble(value));
     }
-    public void setExtra(Ref<EntityStore> ref, Store<EntityStore> store, String key, boolean value) {
-        this.setExtra(ref, store, key, new BsonBoolean(value));
+    public void setExtra(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, String key, boolean value) {
+        this.setExtra(context, ref, store, key, new BsonBoolean(value));
     }
 
     protected <T> SpellField<T> requireField(String name, Codec<T> codec) {
@@ -137,6 +98,9 @@ public abstract class Spell {
     }
     protected SpellField<Boolean> requireFieldBoolean(String name) {
         return this.requireField(name, Codec.BOOLEAN);
+    }
+    protected <E extends Enum<E>> SpellField<E> requireFieldEnum(String name, Class<E> eClass) {
+        return this.requireField(name, new EnumCodec<>(eClass));
     }
 
     public String getName() {

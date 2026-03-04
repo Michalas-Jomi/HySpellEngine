@@ -27,17 +27,17 @@ public abstract class LeveledSpell extends Spell {
         this.setLevel(context, ref, store, 1);
     }
 
-    public int getLevel(Ref<EntityStore> ref, Store<EntityStore> store) {
+    public int getLevel(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store) {
         if (this.has(ref, store))
-            return this.getExtraInt(ref, store, "level");
+            return this.getExtraInt(context, ref, store, "level");
         return 0;
     }
 
     public void setLevel(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, int level) {
-        if (level == this.getLevel(ref, store))
+        if (level == this.getLevel(context, ref, store))
             return;
 
         this.apply(context, ref, store, level);
-        this.setExtra(ref, store, "level", level);
+        this.setExtra(context, ref, store, "level", level);
     }
 }

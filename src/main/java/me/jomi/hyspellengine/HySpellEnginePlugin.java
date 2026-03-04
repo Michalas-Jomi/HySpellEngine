@@ -3,13 +3,16 @@ package me.jomi.hyspellengine;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
+import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import me.jomi.hyspellengine.api.Experience;
 import me.jomi.hyspellengine.api.Spell;
 import me.jomi.hyspellengine.core.ExperienceRegistry;
+import me.jomi.hyspellengine.core.SpellContext;
 import me.jomi.hyspellengine.core.SpellRegistry;
 import me.jomi.hyspellengine.spells.PermissionSpell;
 import me.jomi.hyspellengine.spells.StatsSpell;
@@ -45,14 +48,10 @@ public class HySpellEnginePlugin extends JavaPlugin {
 
     @Override
     protected void setup() {
-        LOGGER.at(Level.INFO).log("[HySpellEngine] Setting up...");
-
         this.registerComponents();
+
         this.registerExperiences();
         this.registerSpells();
-
-        LOGGER.at(Level.INFO).log("[HySpellEngine] Setup complete!");
-
     }
 
     private void registerExperiences() {
@@ -69,12 +68,13 @@ public class HySpellEnginePlugin extends JavaPlugin {
 
     private Map<Class<? extends Component<EntityStore>>, ComponentType<EntityStore, ? extends Component<EntityStore>>> componentTypeMap = new HashMap<>();
     private void registerComponents() {
-        registerComponent(Spell.SpellComponent.class, Spell.SpellComponent.CODEC);
+        registerComponent(SpellContext.SpellComponent.class, SpellContext.SpellComponent.CODEC);
+        registerComponent(Experience.ExperienceComponent.class, Experience.ExperienceComponent.CODEC);
     }
     private <T extends Component<EntityStore>> void registerComponent(Class<T> clazz, BuilderCodec<T> codec) {
         ComponentType<EntityStore, T> type = getEntityStoreRegistry().registerComponent(
                 clazz,
-                "hytalespellengine" + clazz.getSimpleName().toLowerCase(),
+                "hyspellengine" + clazz.getSimpleName().toLowerCase(),
                 codec
         );
         this.componentTypeMap.put(clazz, type);

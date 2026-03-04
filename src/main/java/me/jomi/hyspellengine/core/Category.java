@@ -1,7 +1,10 @@
 package me.jomi.hyspellengine.core;
 
 import me.jomi.hyspellengine.api.Experience;
-import me.jomi.hyspellengine.api.Spell;
 
-public record Category(String name, Experience experience, SpellContext root) {
+import java.nio.file.Path;
+
+public record Category(Display display, Experience experience, SpellContext root) {
+    public static record Display(String name, String description, Path icon) {
+    }
 }
