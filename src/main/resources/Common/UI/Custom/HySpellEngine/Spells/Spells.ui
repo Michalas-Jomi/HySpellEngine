@@ -1,0 +1,20 @@
+$C = "../../Common.ui";
+
+Group #SpellsRoot {
+  Group #Categories {
+    Anchor: (Left: 15, Width: 300, Height: 850);
+    Background: #00ff00;
+
+    FlexWeight: 1;
+    LayoutMode: TopScrolling;
+    ScrollbarStyle: $C.@DefaultScrollbarStyle;
+  }
+  Group #Spells {
+    Anchor: (Right: 15, Width: 1200, Height: 800);
+    Background: #ff00ff;
+
+    FlexWeight: 1;
+    LayoutMode: TopScrolling;
+    ScrollbarStyle: $C.@DefaultScrollbarStyle;
+  }
+}

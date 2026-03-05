@@ -11,6 +11,7 @@ import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import me.jomi.hyspellengine.api.Experience;
 import me.jomi.hyspellengine.api.Spell;
+import me.jomi.hyspellengine.commands.SpellsCommand;
 import me.jomi.hyspellengine.core.ExperienceRegistry;
 import me.jomi.hyspellengine.core.SpellContext;
 import me.jomi.hyspellengine.core.SpellRegistry;
@@ -29,7 +30,6 @@ import java.util.logging.Level;
  * @version 1.0.0
  */
 public class HySpellEnginePlugin extends JavaPlugin {
-
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private static HySpellEnginePlugin instance;
     private final SpellRegistry spellRegistry;
@@ -49,6 +49,7 @@ public class HySpellEnginePlugin extends JavaPlugin {
     @Override
     protected void setup() {
         this.registerComponents();
+        this.registerCommands();
 
         this.registerExperiences();
         this.registerSpells();
@@ -64,6 +65,10 @@ public class HySpellEnginePlugin extends JavaPlugin {
     private void registerSpells() {
         this.getSpellRegistry().registerSpell(new PermissionSpell());
         this.getSpellRegistry().registerSpell(new StatsSpell());
+    }
+
+    private void registerCommands() {
+        this.getCommandRegistry().registerCommand(new SpellsCommand());
     }
 
     private Map<Class<? extends Component<EntityStore>>, ComponentType<EntityStore, ? extends Component<EntityStore>>> componentTypeMap = new HashMap<>();
@@ -99,6 +104,9 @@ public class HySpellEnginePlugin extends JavaPlugin {
         return this.experienceRegistry;
     }
 
+    public static void debugLog(String msg) {
+        HySpellEnginePlugin.log(msg);
+    }
     public static void log(String msg) {
         LOGGER.at(Level.INFO).log(msg);
     }

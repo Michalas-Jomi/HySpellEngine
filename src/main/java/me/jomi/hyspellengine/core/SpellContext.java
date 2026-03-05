@@ -13,14 +13,15 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.UUID;
 
-public record SpellContext(Category category, @NullableDecl SpellContext parent, Spell spell, Display display, UUID uuid, BsonDocument fields, SpellContext[] children) {
+public class SpellContext {
     public static record Display(String name, String description, Path icon, int x, int y) {
     }
-
     public static class SpellComponent implements Component<EntityStore> {
         public static final BuilderCodec<SpellComponent> CODEC = EasyCodec.create(SpellComponent.class);
+
         public static ComponentType<EntityStore, SpellComponent> getComponentType() {
             return HySpellEnginePlugin.getInstance().getComponentType(SpellComponent.class);
         }
@@ -32,6 +33,7 @@ public record SpellContext(Category category, @NullableDecl SpellContext parent,
         public BsonDocument getSpellMap(Spell spell) {
             return this.spells.get(spell.getName()).asDocument();
         }
+
         public BsonDocument getOrCreateSpellMap(Spell spell) {
             BsonDocument bson = this.getSpellMap(spell);
             if (bson == null) {
@@ -45,39 +47,45 @@ public record SpellContext(Category category, @NullableDecl SpellContext parent,
             if (extra == null)
                 extra = new BsonDocument();
 
-            BsonDocument spellMap = this.getOrCreateSpellMap(spell.spell());
-            spellMap.put(spell.uuid().toString(), extra);
+            BsonDocument spellMap = this.getOrCreateSpellMap(spell.getSpell());
+            spellMap.put(spell.getUuid().toString(), extra);
         }
+
         public boolean removeSpell(@NonNullDecl SpellContext spell) {
-            BsonDocument spellMap = this.getSpellMap(spell.spell());
+            BsonDocument spellMap = this.getSpellMap(spell.getSpell());
             if (spellMap == null)
                 return false;
 
-            return spellMap.remove(spell.uuid().toString()) != null;
+            return spellMap.remove(spell.getUuid().toString()) != null;
         }
+
         public boolean removeSpell(@NonNullDecl Spell spell) {
             return this.spells.remove(spell.getName()) != null;
         }
+
         public boolean hasSpell(@NonNullDecl SpellContext spell) {
-            BsonDocument spellMap = this.getSpellMap(spell.spell());
+            BsonDocument spellMap = this.getSpellMap(spell.getSpell());
             if (spellMap == null)
                 return false;
-            return spellMap.containsKey(spell.uuid().toString());
+            return spellMap.containsKey(spell.getUuid().toString());
         }
+
         public boolean hasSpell(@NonNullDecl Spell spell) {
             return this.spells.containsKey(spell.getName());
         }
 
         private BsonDocument getExtra(@NonNullDecl SpellContext spell) {
-            BsonDocument spellMap = this.getSpellMap(spell.spell());
+            BsonDocument spellMap = this.getSpellMap(spell.getSpell());
             if (spellMap == null)
                 return null;
-            return spellMap.get(spell.uuid().toString()).asDocument();
+            return spellMap.get(spell.getUuid().toString()).asDocument();
         }
+
         public BsonValue getExtra(@NonNullDecl SpellContext spell, String key) {
             BsonDocument extra = this.getExtra(spell);
             return extra == null ? null : extra.get(key);
         }
+
         public void setExtra(SpellContext spell, String key, BsonValue value) {
             this.getExtra(spell).put(key, value);
         }
@@ -88,5 +96,56 @@ public record SpellContext(Category category, @NullableDecl SpellContext parent,
             copy.spells = this.spells.clone();
             return copy;
         }
+    }
+
+    Category category;
+    @NullableDecl private SpellContext parent;
+    private final Spell spell;
+    private final Display display;
+    private final UUID uuid;
+    private final BsonDocument fields;
+    private final SpellContext[] children;
+
+    public SpellContext(Spell spell, Display display, UUID uuid, BsonDocument fields, SpellContext[] children) {
+        this.spell = spell;
+        this.display = display;
+        this.uuid = uuid;
+        this.fields = fields;
+        this.children = children;
+
+        for (SpellContext child : this.children) {
+            if (child.parent != null)
+                throw new IllegalArgumentException("SpellContext can't has more than 1 parent");
+            child.parent = this;
+        }
+    }
+
+    public SpellContext[] getChildren() {
+        return children;
+    }
+    public BsonDocument getFields() {
+        return fields;
+    }
+    public UUID getUuid() {
+        return uuid;
+    }
+    public Display getDisplay() {
+        return display;
+    }
+    public Spell getSpell() {
+        return spell;
+    }
+    @NullableDecl
+    public SpellContext getParent() {
+        return parent;
+    }
+    public Category getCategory() {
+        return category;
+    }
+
+    void setCategory(Category category) {
+        this.category = category;
+        for (SpellContext child : this.children)
+            child.setCategory(category);
     }
 }

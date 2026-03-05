@@ -1,0 +1,34 @@
+$C = "../../Common.ui";
+
+@NavButton = TextButton {
+  Style: $C.@DefaultTextButtonStyle;
+};
+
+$C.@DecoratedContainer {
+  @CloseButton = true;
+  Anchor: (Width: 1600, Height: 983);
+
+  #Title {
+    $C.@Title #TitleLabel {
+      @Text = "Chose your path";
+    }
+  }
+
+  #Content {
+    Group #Nav {
+        Anchor: (Top: 0, Width: 1500, Height: 30);
+        @NavButton #SpellsButton {
+          Text: "Spells";
+          Anchor: (Left: 100, Width: 600);
+        }
+        @NavButton #ExpButton {
+          Text: "Experience";
+          Anchor: (Right: 100, Width: 600);
+        }
+    }
+
+    Group #Container {
+      Anchor: (Top: 20);
+    }
+  }
+}

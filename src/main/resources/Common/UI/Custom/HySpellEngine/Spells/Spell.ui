@@ -1,0 +1,12 @@
+$C = "../../Common.ui";
+
+Group #SpellRoot {
+  Anchor: (Width: 80, Height: 80, Left: 10, Top: 10);
+  Background: #33FF33;
+
+  TextButton #SpellButton {
+    Anchor: (Width: 80, Height: 80);
+    Style: $C.@DefaultTextButtonStyle;
+    Text: "Spell";
+  }
+}

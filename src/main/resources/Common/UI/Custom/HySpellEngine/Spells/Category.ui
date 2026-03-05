@@ -1,0 +1,9 @@
+$C = "../../Common.ui";
+
+Group {
+  TextButton #CategoryButton {
+    Anchor: (Width: 250, Left: 25, Height: 80, Top: 10);
+    Style: $C.@DefaultTextButtonStyle;
+    Text: "Category Name";
+  }
+}

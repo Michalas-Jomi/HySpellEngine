@@ -45,7 +45,7 @@ public class StatsSpell extends LeveledSpell {
         EntityStatMap stats = store.getComponent(ref, EntityStatMap.getComponentType());
         stats.putModifier(
                 stat.index,
-                context.uuid().toString(),
+                context.getUuid().toString(),
                 new StaticModifier(Modifier.ModifierTarget.MAX, StaticModifier.CalculationType.ADDITIVE, (float) boost));
     }
     @Override
@@ -55,7 +55,7 @@ public class StatsSpell extends LeveledSpell {
         EntityStatMap stats = store.getComponent(ref, EntityStatMap.getComponentType());
         stats.removeModifier(
                 stat.index,
-                context.uuid().toString()
+                context.getUuid().toString()
         );
     }
 }

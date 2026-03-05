@@ -1,0 +1,10 @@
+Group #SpellGroup {
+  LayoutMode: Top;
+  Group #Parent {
+    Anchor: (Height: 100);
+    LayoutMode: Center;
+  }
+  Group #Children {
+    LayoutMode: Center;
+  }
+}
