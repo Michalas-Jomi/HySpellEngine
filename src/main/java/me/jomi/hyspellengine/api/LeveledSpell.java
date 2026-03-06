@@ -15,7 +15,7 @@ public abstract class LeveledSpell extends Spell {
 
     /**
      *
-     * @param context
+     * @param context spell representation from gui
      * @param ref     player reference
      * @param store   store
      * @param level   level of skill, level is incremented from 1 every time when player learn next level of this skill, to check previous level use getLevel() inside
@@ -23,7 +23,7 @@ public abstract class LeveledSpell extends Spell {
     public abstract void apply(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, int level);
 
     @Override
-    public void apply(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store) {
+    public final void apply(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store) {
         this.setLevel(context, ref, store, 1);
     }
 

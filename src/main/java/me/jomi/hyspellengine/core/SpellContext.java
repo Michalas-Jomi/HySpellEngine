@@ -17,7 +17,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class SpellContext {
-    public static record Display(String name, String description, Path icon, int x, int y) {
+    public static record Display(String name, String description, Path icon) {
     }
     public static class SpellComponent implements Component<EntityStore> {
         public static final BuilderCodec<SpellComponent> CODEC = EasyCodec.create(SpellComponent.class);

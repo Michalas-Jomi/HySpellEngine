@@ -1,0 +1,11 @@
+$C = "../../Common.ui";
+
+Group #ExperiencesRoot {
+  Group #Experiences {
+    Anchor: (Width: 1000, Height: 800);
+
+    FlexWeight: 1;
+    LayoutMode: TopScrolling;
+    ScrollbarStyle: $C.@DefaultScrollbarStyle;
+  }
+}

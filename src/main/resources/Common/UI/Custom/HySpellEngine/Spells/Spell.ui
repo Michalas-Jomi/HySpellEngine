@@ -1,12 +1,34 @@
 $C = "../../Common.ui";
 
-Group #SpellRoot {
-  Anchor: (Width: 80, Height: 80, Left: 10, Top: 10);
-  Background: #33FF33;
+@ButtonBorder = 4;
 
+@DefaultButtonDefaultBackground = PatchStyle(TexturePath: "../Images/SpellDefault.png", VerticalBorder: @ButtonBorder, HorizontalBorder: @ButtonBorder);
+@DefaultButtonHoveredBackground = PatchStyle(TexturePath: "../Images/SpellHovered.png", VerticalBorder: @ButtonBorder, HorizontalBorder: @ButtonBorder);
+@DefaultButtonPressedBackground = PatchStyle(TexturePath: "../Images/SpellPressed.png", VerticalBorder: @ButtonBorder, HorizontalBorder: @ButtonBorder);
+@DefaultButtonDisabledBackground = PatchStyle(TexturePath: "../Images/SpellDisabled.png", VerticalBorder: @ButtonBorder, HorizontalBorder: @ButtonBorder);
+
+@LabelStyle = LabelStyle(
+  ...$C.@DefaultButtonLabelStyle,
+  TextColor: #ffffff
+);
+
+@TextButtonStyle = TextButtonStyle(
+  Default: (Background: @DefaultButtonDefaultBackground, LabelStyle: @LabelStyle),
+  Hovered: (Background: @DefaultButtonHoveredBackground, LabelStyle: @LabelStyle),
+  Pressed: (Background: @DefaultButtonPressedBackground, LabelStyle: @LabelStyle),
+  Disabled: (Background: @DefaultButtonDisabledBackground, LabelStyle: @LabelStyle),
+  Sounds: $C.@ButtonSounds,
+);
+
+Group #SpellRoot {
+  Anchor: (Width: 80, Height: 80, Top: 10);
+  AssetImage #Icon {
+    Anchor: (Width: 80, Height: 80);
+  }
   TextButton #SpellButton {
     Anchor: (Width: 80, Height: 80);
-    Style: $C.@DefaultTextButtonStyle;
+    Style: @TextButtonStyle;
+    TextTooltipStyle: $C.@DefaultTextTooltipStyle;
     Text: "Spell";
   }
 }

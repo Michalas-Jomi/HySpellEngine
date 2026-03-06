@@ -1,9 +1,14 @@
 $C = "../../Common.ui";
+$S = "Spell.ui";
 
 Group {
+  AssetImage #Icon {
+    Anchor: (Width: 250, Left: 25, Height: 80, Top: 10);
+  }
   TextButton #CategoryButton {
     Anchor: (Width: 250, Left: 25, Height: 80, Top: 10);
-    Style: $C.@DefaultTextButtonStyle;
+    Style: $S.@TextButtonStyle;
     Text: "Category Name";
+    TextTooltipStyle: $C.@DefaultTextTooltipStyle;
   }
 }

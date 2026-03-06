@@ -84,6 +84,15 @@ public record Experience(String name) {
         return 0;
     }
 
+    public double getExpForNextLevel(Ref<EntityStore> ref, Store<EntityStore> store) {
+        int lvl = this.getLevel(ref, store);
+
+        if (lvl == this.getMaxLevel())
+            return -1;
+
+        return this.getLevels()[lvl].exp();
+    }
+
     public void addExp(Ref<EntityStore> ref, Store<EntityStore> store, double exp) {
         ExperienceComponent component = store.ensureAndGetComponent(ref, ExperienceComponent.getComponentType());
         int level = getLevel(ref, store);

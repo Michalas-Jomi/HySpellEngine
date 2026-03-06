@@ -1,0 +1,60 @@
+Group #ExperienceRoot {
+  Padding: (Vertical: 10);
+  Group {
+    Anchor: (Width: 800, Height: 120);
+    Padding: (Top: 10, Bottom: 10);
+    Background: #1a1a2e(0.95);
+    LayoutMode: Top;
+
+    Group {
+      Anchor: (Width: 800, Height: 30);
+      Label #ExperienceNameLabel {
+        Text: "Experience name";
+        Anchor: (Width: 700, Height: 30, Top: 0);
+        Style: (
+          FontSize: 14,
+          TextColor: #ffffff,
+            RenderBold: true,
+            HorizontalAlignment: Center
+        );
+      }
+      Label #ExperienceLevelLabel {
+        Text: "-1 lv";
+        Anchor: (Width: 50, Height: 30, Right: 0);
+        Style: (
+          FontSize: 12,
+          TextColor: #ffffff,
+          HorizontalAlignment: Center
+        );
+      }
+    }
+    Group {
+      Anchor: (Width: 800, Height: 60);
+      LayoutMode: Center;
+      Group {
+        Anchor: (Width: 600, Height: 30);
+        Background: "../../Common/ProgressBar.png";
+        ProgressBar #ProgressBar {
+          BarTexturePath: "../../Common/ProgressBarFill.png";
+          EffectTexturePath: "../../Common/ProgressBarEffect.png";
+          EffectWidth: 700;
+          EffectHeight: 50;
+          EffectOffset: 20;
+        }
+      }
+    }
+    Group {
+      Anchor: (Width: 800, Height: 10);
+      LayoutMode: Center;
+      Label #ExperienceExpLabel {
+        Text: "-1 lv";
+        Anchor: (Height: 10);
+        Style: (
+          FontSize: 10,
+          TextColor: #ffffff,
+          HorizontalAlignment: Center
+        );
+      }
+    }
+  }
+}
