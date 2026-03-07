@@ -39,16 +39,22 @@ public final class SpellContext {
         // Map<String, Map<UUID, Map<String, BsonValue>>>
         @EasyCodec.ForCodec public BsonDocument spells = new BsonDocument();
 
+        @NullableDecl
         public BsonDocument getSpellMap(Spell spell) {
-            return this.spells.get(spell.getName()).asDocument();
+            if (this.spells.containsKey(spell.getName()))
+                return this.spells.get(spell.getName()).asDocument();
+            return null;
         }
 
+        @NonNullDecl
         public BsonDocument getOrCreateSpellMap(Spell spell) {
             BsonDocument bson = this.getSpellMap(spell);
-            if (bson == null) {
-                bson = new BsonDocument();
-                this.spells.put(spell.getName(), bson);
-            }
+            if (bson != null)
+                return bson;
+
+            bson = new BsonDocument();
+            this.spells.put(spell.getName(), bson);
+
             return bson;
         }
 
@@ -152,6 +158,26 @@ public final class SpellContext {
     }
     public Category getCategory() {
         return category;
+    }
+
+    public boolean isLearned(Ref<EntityStore> ref, Store<EntityStore> store) {
+        SpellContext.SpellComponent component = store.getComponent(ref, SpellContext.SpellComponent.getComponentType());
+        return component != null && component.hasSpell(this);
+    }
+
+    public boolean learn(Ref<EntityStore> ref, Store<EntityStore> store) {
+        if (getSpell().has(this, ref, store))
+            return false;
+
+        SpellComponent component = store.ensureAndGetComponent(ref, SpellComponent.getComponentType());
+        component.addSpell(this, null);
+        return true;
+    }
+
+    public boolean isParentLearned(Ref<EntityStore> ref, Store<EntityStore> store) {
+        if (this.parent == null)
+            return true;
+        return this.parent.isLearned(ref, store);
     }
 
     void setCategory(Category category) {

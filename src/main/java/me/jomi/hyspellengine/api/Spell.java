@@ -95,8 +95,7 @@ public abstract class Spell {
      * @return true if player has learned this spell
      */
     public final boolean has(SpellContext spellContext, Ref<EntityStore> ref, Store<EntityStore> store) {
-        SpellContext.SpellComponent component = store.getComponent(ref, SpellContext.SpellComponent.getComponentType());
-        return component != null && component.hasSpell(spellContext);
+        return spellContext.isLearned(ref, store);
     }
 
 
@@ -178,6 +177,11 @@ public abstract class Spell {
      */
     public void setExtra(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, String key, boolean value) {
         this.setExtra(context, ref, store, key, new BsonBoolean(value));
+    }
+
+    public boolean hasExtra(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, String key) {
+        BsonValue extra = this.getExtra(context, ref, store, key);
+        return extra != null;
     }
 
     // TODO Predicate<String> validator

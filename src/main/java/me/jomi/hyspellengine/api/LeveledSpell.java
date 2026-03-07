@@ -3,6 +3,7 @@ package me.jomi.hyspellengine.api;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import me.jomi.hyspellengine.HySpellEnginePlugin;
 import me.jomi.hyspellengine.core.SpellContext;
 import me.jomi.hyspellengine.core.SpellField;
 
@@ -25,7 +26,8 @@ public abstract class LeveledSpell extends Spell {
 
     @Override
     public final void apply(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store) {
-        this.setLevel(context, ref, store, 1);
+        int level = this.getLevel(context, ref, store);
+        this.setLevel(context, ref, store,  level + 1);
     }
 
     /**
@@ -37,7 +39,7 @@ public abstract class LeveledSpell extends Spell {
      * @return 0 if not learned, overrise player skill level
      */
     public int getLevel(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store) {
-        if (this.has(context, ref, store))
+        if (this.has(context, ref, store) && this.getExtra(context, ref, store, "level") != null)
             return this.getExtraInt(context, ref, store, "level");
         return 0;
     }
@@ -60,6 +62,8 @@ public abstract class LeveledSpell extends Spell {
      * @see LeveledSpell#getLevel(SpellContext, Ref, Store)
      */
     public void setLevel(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, int level) {
+        HySpellEnginePlugin.debugLog("setting lvl " + level + " max: " + maxLevelField.getValue(context));
+
         if (level == this.getLevel(context, ref, store))
             return;
 

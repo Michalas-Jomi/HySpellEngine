@@ -9,14 +9,14 @@ public class ExperienceRegistry {
     private final Map<String, Experience> registry = new ConcurrentHashMap<>();
 
     public void registerExperience(Experience exp) {
-        this.registry.put(exp.name(), exp);
+        this.registry.put(exp.getName(), exp);
     }
 
     public void unregisterExperience(String name) {
         this.registry.remove(name);
     }
     public void unregisterExperience(Experience exp) {
-        this.unregisterExperience(exp.name());
+        this.unregisterExperience(exp.getName());
     }
 
     public Experience getExperience(String name) {

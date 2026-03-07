@@ -1,10 +1,8 @@
 package me.jomi.hyspellengine.api;
 
 import com.hypixel.hytale.codec.builder.BuilderCodec;
-import com.hypixel.hytale.component.Component;
-import com.hypixel.hytale.component.ComponentType;
-import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.component.*;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import me.jomi.hyspellengine.HySpellEnginePlugin;
 import me.jomi.hyspellengine.core.ExperienceRegistry;
@@ -15,8 +13,18 @@ import org.bson.BsonDouble;
 import org.bson.BsonInt32;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
-public record Experience(String name) {
-    public static record Level(double exp, @NullableDecl String chatMessage, @NullableDecl String sound) {
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+
+public class Experience {
+    /**
+     *
+     * @param exp experience needed to reach level
+     * @param infinite if true, exp will be reused for calculating, can be true only on last element
+     * @param chatMessage chat message to send player on level up
+     * @param sound sound to play for player on level up
+     */
+    public static record Level(double exp, boolean infinite, @NullableDecl String chatMessage, @NullableDecl String sound) {
     }
     public static class ExperienceComponent implements Component<EntityStore> {
         public static final BuilderCodec<ExperienceComponent> CODEC = EasyCodec.create(ExperienceComponent.class);
@@ -32,7 +40,7 @@ public record Experience(String name) {
         @EasyCodec.ForCodec public BsonDocument points = new BsonDocument();
 
         public double getExp(Experience experience) {
-            return experiences.containsKey(experience.name()) ? experiences.getDouble(experience.name()).getValue() : 0;
+            return experiences.containsKey(experience.getName()) ? experiences.getDouble(experience.getName()).getValue() : 0;
         }
         public void addExp(Experience experience, double exp) {
             exp += this.getExp(experience);
@@ -40,20 +48,21 @@ public record Experience(String name) {
         }
         public void setExp(Experience experience, double exp) {
             if (exp <= 0)
-                this.experiences.remove(experience.name());
+                this.experiences.remove(experience.getName());
             else
-                this.experiences.put(experience.name(), new BsonDouble(exp));
+                this.experiences.put(experience.getName(), new BsonDouble(exp));
         }
 
         private BsonArray ensureAndGetPoints(Experience experience) {
-            if (this.points.containsKey(experience.name()))
-                return this.points.getArray(experience.name());
+            if (this.points.containsKey(experience.getName()))
+                return this.points.getArray(experience.getName());
             BsonArray array = new BsonArray();
             array.add(new BsonInt32(0));
             array.add(new BsonInt32(0));
-            this.points.put(experience.name(), array);
+            this.points.put(experience.getName(), array);
             return array;
         }
+
         // unspend + spend
         public int getPoints(Experience experience) {
             BsonArray array = this.ensureAndGetPoints(experience);
@@ -69,6 +78,7 @@ public record Experience(String name) {
             BsonArray array = this.ensureAndGetPoints(experience);
             array.set(0, new BsonInt32(points));
         }
+
         public int getUnspendPoints(Experience experience) {
             BsonArray array = this.ensureAndGetPoints(experience);
             return Math.max(0, array.get(0).asInt32().getValue() - array.get(1).asInt32().getValue());
@@ -97,64 +107,198 @@ public record Experience(String name) {
         }
     }
 
+    private final String name;
+    private boolean visible = false;
+
+    public Experience(String name) {
+        this.name = name;
+    }
+
+    /// Easily access to Experience registry, use this in setup()
     public static ExperienceRegistry getRegistry() {
         return HySpellEnginePlugin.getInstance().getExperienceRegistry();
     }
 
-    // levels[getLeve()] -> next Level
-    public int getLevel(Ref<EntityStore> ref, Store<EntityStore> store) {
+    /// return currently level of player, from 0 to up
+    public int getLevel(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store) {
         double exp = this.getExp(ref, store);
         int i = 0;
-        for (Level level : this.getLevels()) {
-            if (level.exp() > exp)
+        for (Level level : this.getLevels()) { // TODO refactor
+            if (level.infinite() || level.exp() > exp)
                 break;
             i++;
         }
         return i;
     }
 
-    ///  return max level for experience, configurable from game-level
+    ///  return max level for experience, configurable from admin tool, -1 if experience is infinite
     public int getMaxLevel() {
+        if (this.isInfinite())
+            return -1;
         return this.getLevels().length;
     }
 
-    public Level[] getLevels() {
+    ///  return experiences needed for currently level
+    public double getExpNeededForLevel(int level) {
+        if (this.getLevels().length == 0)
+            return Double.MAX_VALUE;
+
+        if (level <= 0)
+            return 0;
+
+        // 1 -> levels[0]
+        level -= 1;
+        int le = this.getLevels().length;
+        if (le > level) {
+            Level lvl = this.getLevels()[level];
+            if (!lvl.infinite())
+                return lvl.exp();
+            return this.getExpNeededForLevel(level) + lvl.exp(); // level decremented
+        }
+        Level inf = this.getLevels()[le - 1];
+        if (!inf.infinite())
+            throw new IllegalArgumentException("cant get exp for non existing level");
+        // [2, 4, 6, 10:inf]
+        // le = 4
+        // level = (x) -> x - 1
+        //
+        // (0) -> 0
+        // (1) -> 2
+        // (2) -> 4
+        // (3) -> 6
+        // (4) -> 16 -> (3) + 10
+        // I am here
+        // (5) -> 26 -> level - le = 0 -> n=2
+        // (6) -> 36 -> level - le = 1 -> n=3
+        // (7) -> 46 -> level - le = 2 -> n=4
+        return this.getExpNeededForLevel(level) + inf.exp() * (level - le + 2);
+    }
+    ///  return level from exp, from 0 to up
+    public int getLevel(double exp) {
+        int le = this.getLevels().length;
+        if (le == 0)
+            return 0;
+
+        int i = 0;
+        for (Level level : this.getLevels()) {
+            if (level.exp() > exp && !level.infinite())
+                return i;
+            i++;
+        }
+
+        Level last = this.getLevels()[le - 1];
+        if (!last.infinite())
+            return i;
+
+        exp -= this.getExpNeededForLevel(le - 1);
+        return le - 1 + (int) (exp / last.exp());
+    }
+
+    protected Level[] getLevels() {
         return new Level[]{}; // TODO load from admin tool
     }
 
-    /// Get player full experience
-    public double getExp(Ref<EntityStore> ref, Store<EntityStore> store) {
-        ExperienceComponent component = store.getComponent(ref, ExperienceComponent.getComponentType());
-        if (component != null)
-            return component.getExp(this);
-        return 0;
+    public boolean canReachNextLevel(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store) {
+        return this.getLevel(ref, store) == this.getMaxLevel();
     }
 
     /// Get player full experience for next level
-    public double getExpForNextLevel(Ref<EntityStore> ref, Store<EntityStore> store) {
+    public double getExpForNextLevel(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store) {
         int lvl = this.getLevel(ref, store);
 
         if (lvl == this.getMaxLevel())
             return -1;
 
-        return this.getLevels()[lvl].exp();
+        return this.getExpNeededForLevel(lvl + 1);
     }
 
+    /// Get player full experience
+    public double getExp(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store) {
+        return this.fromComponent(ref, store, ExperienceComponent::getExp);
+    }
+    /// Sets player full experience to exp value
+    public void setExp(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store, double exp) {
+        this.onComponent(ref, store, comp -> comp.setExp(this, exp));
+    }
     /// Adds experience for a player
-    public void addExp(Ref<EntityStore> ref, Store<EntityStore> store, double exp) {
-        ExperienceComponent component = store.ensureAndGetComponent(ref, ExperienceComponent.getComponentType());
+    public void addExp(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store, double exp) {
         int level = getLevel(ref, store);
-        component.addExp(this, exp);
+        this.onComponent(ref, store, comp -> comp.addExp(this, exp));
+        PlayerRef player = store.getComponent(ref, PlayerRef.getComponentType());
+        HySpellEnginePlugin.debugLog("exp " + this.getName() + (this.isInfinite() ? ":inf" : "") + " gained for " + player.getUsername() + " " + getExp(ref, store) + " / " + getExpForNextLevel(ref, store));
         if (getLevel(ref, store) > level)
             this.onLevelUp(ref, store);
     }
-    /// Sets player full experience to exp value
-    public void setExp(Ref<EntityStore> ref, Store<EntityStore> store, double exp) {
-        ExperienceComponent component = store.ensureAndGetComponent(ref, ExperienceComponent.getComponentType());
-        component.setExp(this, exp);
+
+    ///  Get player all spell points spend + unspend
+    public int getPoints(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store) {
+        return this.fromComponent(ref, store, ExperienceComponent::getPoints);
+    }
+    ///  Add player spell point
+    public void addPoints(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store, int points) {
+        this.onComponent(ref, store, comp -> comp.addPoints(this, points));
+    }
+    /// Sets player spell points
+    public void setPoints(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store, int points) {
+        this.onComponent(ref, store, comp -> comp.setPoints(this, points));
     }
 
-    public void onLevelUp(Ref<EntityStore> ref, Store<EntityStore> store) {
+    ///  Get player unspend spell points
+    public int getUnspendPoints(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store) {
+        return this.fromComponent(ref, store, ExperienceComponent::getUnspendPoints);
+    }
+    ///  Get player spend spell points
+    public int getSpendPoints(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store) {
+        return this.fromComponent(ref, store, ExperienceComponent::getSpendPoints);
+    }
+    ///  Spend spell point like a player
+    public void addSpendPoints(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store, int points) {
+        this.onComponent(ref, store, comp -> comp.addSpendPoints(this, points));
+    }
+    ///  Sets player spend spell points
+    public void setSpendPoints(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store, int points) {
+        this.onComponent(ref, store, comp -> comp.setSpendPoints(this, points));
+    }
+
+    protected <T> T fromComponent(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store, BiFunction<ExperienceComponent, Experience, T> work) {
+        ExperienceComponent component = this.getComponent(ref, store);
+        return work.apply(component, this);
+    }
+    protected void onComponent(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store, Consumer<ExperienceComponent> work) {
+        ExperienceComponent component = this.getComponent(ref, store);;
+        work.accept(component);
+    }
+
+
+    ///  triggers on player level up
+    public void onLevelUp(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store) {
         // TODO
+    }
+
+    /// Get player ExperienceComponent
+    public ExperienceComponent getComponent(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store) {
+        return store.ensureAndGetComponent(ref, ExperienceComponent.getComponentType());
+    }
+
+    /// Get Experience name
+    public String getName() {
+        return name;
+    }
+
+    /// true if Experience has not level cap, configurable in admin-tool
+    public boolean isInfinite() {
+        Level[] levels = this.getLevels();
+        if (levels.length == 0)
+            return true;
+        return levels[levels.length - 1].infinite;
+    }
+
+    /// true means Experience is used in gui, false means ignored
+    public boolean isVisible() {
+        return visible;
+    }
+    /// sets experience visible in gui
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 }

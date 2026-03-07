@@ -1,5 +1,8 @@
 package me.jomi.hyspellengine;
 
+import com.hypixel.hytale.codec.EmptyExtraInfo;
+import com.hypixel.hytale.codec.codecs.EnumCodec;
+import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
 import me.jomi.hyspellengine.api.Experience;
 import me.jomi.hyspellengine.api.Spell;
 import me.jomi.hyspellengine.core.Category;
@@ -10,11 +13,35 @@ import org.bson.BsonString;
 import java.nio.file.Path;
 import java.util.UUID;
 
-public class ExampleData {
+public class DefaultData {
     public static void makeExampleData() {
-        Data.addCategory(makeExapleCategory());
-        Data.addCategory(makeExapleCategory());
-        Data.addCategory(makeExapleCategory());
+        Data.addCategory(categoryCombat());
+    }
+    private static Category categoryCombat() {
+
+
+        SpellContext root = new SpellContext(
+                Spell.getSpellRegistry().getSpell("Stat"),
+                new SpellContext.Display(
+                        "Growth",
+                        "Make your bones stronger",
+                        Path.of("Icons", "CraftingCategories", "Alchemy", "Combat_Potions.png")
+                ),
+                UUID.randomUUID(),
+                BsonDocument.parse("{\"Stat\":\"Health\",\"levels\":[10.0, 20.0, 30.0],\"method\":\"Additive\",\"max level\":3}"),
+                new SpellContext[0]
+        );
+
+
+        return new Category(
+                new Category.Display(
+                        "Fighting",
+                        "Master your fight",
+                        Path.of("Icons", "ItemCategories", "Items-Weapons.png")
+                ),
+                HySpellEnginePlugin.Experiences.combat,
+                root
+        );
     }
     private static Category makeExapleCategory() {
         return makeExapleCategory(2);

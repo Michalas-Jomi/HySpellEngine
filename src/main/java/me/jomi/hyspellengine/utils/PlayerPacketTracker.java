@@ -132,6 +132,12 @@ public class PlayerPacketTracker {
     public static <T extends Packet> void registerHandlerOut(Class<T> clazz, BiConsumer<GamePacketHandler, T> function) {
         PlayerPacketTracker.registeredOut.put(clazz.getSimpleName(), function);
     }
+    public static <T extends Packet> void unregisterHandlerIn(Class<T> clazz) {
+        PlayerPacketTracker.registeredIn.remove(clazz.getSimpleName());
+    }
+    public static <T extends Packet> void unregisterHandlerOut(Class<T> clazz) {
+        PlayerPacketTracker.registeredOut.remove(clazz.getSimpleName());
+    }
 
 
     static {

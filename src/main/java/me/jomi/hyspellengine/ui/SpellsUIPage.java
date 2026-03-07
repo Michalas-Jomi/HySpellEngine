@@ -34,6 +34,7 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         public static final BuilderCodec<SpellsUIEventData> CODEC = EasyCodec.create(SpellsUIEventData.class);
 
         @EasyCodec.ForCodec public String action;
+        @EasyCodec.ForCodec public String selector;
         @EasyCodec.ForCodec public String category;
         @EasyCodec.ForCodec public String tab;
         @EasyCodec.ForCodec public String spell; // UUID
@@ -96,8 +97,17 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         ui.set(selector + "#Parent #SpellButton.Text", spell.getDisplay().name());
         ui.set(selector + "#Parent #SpellButton.TooltipText", spell.getDisplay().description());
         ui.set(selector + "#Parent #Icon.AssetPath", spell.getDisplay().icon().toString().replace('\\', '/'));
+        if (!spell.getSpell().canApply(spell, ref, store))
+            ui.set(selector + "#Parent #SpellButton.Disabled", true);
+        if (!spell.isParentLearned(ref, store)) {
+            // TODO do something
+        }
 
-        events.addEventBinding(CustomUIEventBindingType.Activating, selector + "#Parent #SpellButton", EventData.of("ACTION", "spell").put("SPELL", spell.getUuid().toString()));
+        events.addEventBinding(CustomUIEventBindingType.Activating, selector + "#Parent #SpellButton", EventData
+                .of("ACTION", "spell")
+                .put("SPELL", spell.getUuid().toString())
+                .put("SELECTOR", selector)
+        );
 
         spell.getSpell().build(spell, ref, store, ui, events, selector + "#Parent ");
 
@@ -122,17 +132,20 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
 
         int i = -1;
         for (Experience experience : experiences) {
+            if (!experience.isVisible())
+                continue;
+
             int lvl = experience.getLevel(ref, store);
             double exp = experience.getExp(ref, store);
             double nextExp = experience.getExpForNextLevel(ref, store);
-            double percent = .45f; // TODO change to 1
+            double percent = 1;
 
 
             String visibleExp;
             if (nextExp == -1) {
                 visibleExp = "MAX";
             } else {
-                double previousExp = lvl == 0 ? 0 : experience.getLevels()[lvl - 1].exp();
+                double previousExp = lvl == 0 ? 0 : experience.getExpNeededForLevel(lvl - 1);
                 visibleExp = (nextExp - previousExp) + " / " + (exp - previousExp);
                 if (exp - previousExp == 0)
                     percent = 0;
@@ -144,7 +157,7 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
 
             ui.append("#Experiences", LAYOUT_EXPERIENCE);
             String selector = "#Experiences[" + ++i + "] ";
-            ui.set(selector + "#ExperienceNameLabel.Text", experience.name());
+            ui.set(selector + "#ExperienceNameLabel.Text", experience.getName());
             ui.set(selector + "#ExperienceLevelLabel.Text", lvl + " lv");
             ui.set(selector + "#ExperienceExpLabel.Text", visibleExp);
             ui.set(selector + "#ProgressBar.Value", (float) percent);
@@ -185,7 +198,29 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
     private void handleDataEventSpell(Ref<EntityStore> ref, Store<EntityStore> store, SpellsUIEventData data) {
         SpellContext spell = category.getSpell(UUID.fromString(data.spell));
 
-        spell.getSpell().canApply(spell, ref, store);
+        Experience.ExperienceComponent exp = spell.getCategory().experience().getComponent(ref, store);
+
+        //if (exp.getUnspendPoints(spell.getCategory().experience()) <= 0) // TODO uncomment
+            if (spell.isParentLearned(ref, store) && spell.getSpell().canApply(spell, ref, store)) {
+                String action = " used ";
+                if (!spell.getSpell().has(spell, ref, store)) {
+                    spell.learn(ref, store);
+                    action = " learned ";
+                    // TODO change visibility of children
+                }
+
+                exp.addSpendPoints(spell.getCategory().experience(), 1);
+
+                spell.getSpell().apply(spell, ref, store);
+                HySpellEnginePlugin.log(playerRef.getUsername() + action + spell.getDisplay().name() + " spell in " + spell.getCategory().display().name());
+
+                if (!spell.getSpell().canApply(spell, ref, store)) {
+                    UICommandBuilder ui = new UICommandBuilder();
+                    ui.set(data.selector + "#Parent #SpellButton.Disabled", true);
+                    sendUpdate(ui, false);
+                    return;
+                }
+            }
 
         HySpellEnginePlugin.debugLog("Spell " + spell.getDisplay().name() + " clicked at " + category.display().name());
 

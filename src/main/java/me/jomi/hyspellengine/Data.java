@@ -6,11 +6,12 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import java.util.Arrays;
 
 public class Data {
-    private static Category[] categories;
+    private static Category[] categories = new Category[0];
     // TODO load experiences levels, not experiences
 
     public static void load() {
-        categories = new Category[0]; // temp
+        for (Category category : categories)
+            category.experience().setVisible(false);
 
         try {
             load0();
@@ -18,9 +19,12 @@ public class Data {
         }
 
         if (categories.length == 0)  {
-            ExampleData.makeExampleData();
+            DefaultData.makeExampleData();
             save();
         }
+
+        for (Category category : categories)
+            category.experience().setVisible(true);
     }
     private static void load0() {
         // TODO

@@ -12,8 +12,9 @@ import me.jomi.hyspellengine.commands.SpellsCommand;
 import me.jomi.hyspellengine.core.ExperienceRegistry;
 import me.jomi.hyspellengine.core.SpellContext;
 import me.jomi.hyspellengine.core.SpellRegistry;
-import me.jomi.hyspellengine.listeners.ParticleSpellTickingSystem;
+import me.jomi.hyspellengine.listeners.*;
 import me.jomi.hyspellengine.spells.*;
+import me.jomi.hyspellengine.utils.PlayerPacketTracker;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -33,6 +34,7 @@ public class HySpellEnginePlugin extends JavaPlugin {
         public static final Experience moving = new Experience("Moving");
         public static final Experience farming = new Experience("Farming");
         public static final Experience dying = new Experience("Dying");
+        public static final Experience any = new Experience("All"); // TODO cancelable expGiveEvent
     }
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
@@ -53,9 +55,12 @@ public class HySpellEnginePlugin extends JavaPlugin {
 
     @Override
     protected void setup() {
+        //PlayerPacketTracker.registerPacketCounters();
+        PlayerPacketTracker.registerStreams();
+
         this.registerComponents();
         this.registerCommands();
-        this.registerSystems();
+        this.registerListeners();
 
         this.registerExperiences();
         this.registerSpells();
@@ -78,8 +83,12 @@ public class HySpellEnginePlugin extends JavaPlugin {
         this.getSpellRegistry().registerSpell(new CommandSpell());
     }
 
-    private void registerSystems() {
+    private void registerListeners() {
         this.getEntityStoreRegistry().registerSystem(new ParticleSpellTickingSystem());
+        this.getEntityStoreRegistry().registerSystem(new EntityDamageSystem());
+        this.getEntityStoreRegistry().registerSystem(new EntityDeathSystem());
+        this.getEntityStoreRegistry().registerSystem(new BlockBreakSystem());
+        this.getEntityStoreRegistry().registerSystem(new MovementSystem());
     }
 
     private void registerCommands() {
