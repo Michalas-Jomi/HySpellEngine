@@ -90,6 +90,7 @@ public class HySpellEnginePlugin extends JavaPlugin {
 
     @Override
     protected void start() {
+        Data.load();
     }
 
     @Override

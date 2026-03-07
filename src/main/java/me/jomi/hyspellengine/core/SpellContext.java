@@ -3,6 +3,8 @@ package me.jomi.hyspellengine.core;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import me.jomi.hyspellengine.HySpellEnginePlugin;
 import me.jomi.hyspellengine.api.Spell;
@@ -16,7 +18,14 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.UUID;
 
-public class SpellContext {
+/**
+ * Spell representation in gui
+ * contains data about learnable spell made in admin tool and has access to player metadata per skill
+ *
+ * @see Spell
+ * @see Spell#getExtra(SpellContext, Ref, Store, String)
+ */
+public final class SpellContext {
     public static record Display(String name, String description, Path icon) {
     }
     public static class SpellComponent implements Component<EntityStore> {
@@ -123,6 +132,7 @@ public class SpellContext {
     public SpellContext[] getChildren() {
         return children;
     }
+    // fieldName : fieldData
     public BsonDocument getFields() {
         return fields;
     }
@@ -132,6 +142,7 @@ public class SpellContext {
     public Display getDisplay() {
         return display;
     }
+    @NonNullDecl
     public Spell getSpell() {
         return spell;
     }

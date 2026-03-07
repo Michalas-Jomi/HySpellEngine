@@ -69,6 +69,7 @@ public record Experience(String name) {
         return i;
     }
 
+    ///  return max level for experience, configurable from game-level
     public int getMaxLevel() {
         return this.getLevels().length;
     }
@@ -77,6 +78,7 @@ public record Experience(String name) {
         return new Level[]{}; // TODO load from admin tool
     }
 
+    /// Get player full experience
     public double getExp(Ref<EntityStore> ref, Store<EntityStore> store) {
         ExperienceComponent component = store.getComponent(ref, ExperienceComponent.getComponentType());
         if (component != null)
@@ -84,6 +86,7 @@ public record Experience(String name) {
         return 0;
     }
 
+    /// Get player full experience for next level
     public double getExpForNextLevel(Ref<EntityStore> ref, Store<EntityStore> store) {
         int lvl = this.getLevel(ref, store);
 
@@ -93,6 +96,7 @@ public record Experience(String name) {
         return this.getLevels()[lvl].exp();
     }
 
+    /// Adds experience for a player
     public void addExp(Ref<EntityStore> ref, Store<EntityStore> store, double exp) {
         ExperienceComponent component = store.ensureAndGetComponent(ref, ExperienceComponent.getComponentType());
         int level = getLevel(ref, store);
@@ -100,12 +104,13 @@ public record Experience(String name) {
         if (getLevel(ref, store) > level)
             this.onLevelUp(ref, store);
     }
+    /// Sets player full experience to exp value
     public void setExp(Ref<EntityStore> ref, Store<EntityStore> store, double exp) {
         ExperienceComponent component = store.ensureAndGetComponent(ref, ExperienceComponent.getComponentType());
         component.setExp(this, exp);
     }
 
-    // Optionally for Override
     public void onLevelUp(Ref<EntityStore> ref, Store<EntityStore> store) {
+        // TODO
     }
 }

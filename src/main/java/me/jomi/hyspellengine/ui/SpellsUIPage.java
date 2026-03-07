@@ -1,24 +1,17 @@
 package me.jomi.hyspellengine.ui;
 
-import com.hypixel.hytale.builtin.adventure.memories.page.MemoriesPage;
-import com.hypixel.hytale.builtin.adventure.shop.ShopAsset;
-import com.hypixel.hytale.builtin.adventure.shop.ShopPage;
-import com.hypixel.hytale.builtin.buildertools.prefabeditor.ui.PrefabEditorSaveSettingsPage;
-import com.hypixel.hytale.builtin.buildertools.prefabeditor.ui.PrefabTeleportPage;
-import com.hypixel.hytale.builtin.buildertools.prefablist.PrefabSavePage;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
-import com.hypixel.hytale.server.core.entity.entities.player.pages.RespawnPage;
-import com.hypixel.hytale.server.core.ui.Value;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import me.jomi.hyspellengine.Data;
 import me.jomi.hyspellengine.HySpellEnginePlugin;
 import me.jomi.hyspellengine.api.Experience;
 import me.jomi.hyspellengine.core.Category;
@@ -56,10 +49,8 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
 
     private Category category;
 
-    private final Category[] categories;
-    public SpellsUIPage(@NonNullDecl PlayerRef playerRef, Category[] categories) { // TODO param categories is temp
+    public SpellsUIPage(@NonNullDecl PlayerRef playerRef) {
         super(playerRef, CustomPageLifetime.CanDismissOrCloseThroughInteraction, SpellsUIEventData.CODEC);
-        this.categories = categories;
     }
 
     @Override
@@ -78,7 +69,7 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         ui.append("#Container", LAYOUT_SPELLS);
 
         int i = -1;
-        for (Category category : categories) {
+        for (Category category : Data.getCategories()) {
             ui.append("#Categories", LAYOUT_CATEGORY);
             String selector = "#Categories[" + ++i + "] ";
             ui.set(selector + "#CategoryButton.Text", category.display().name());
@@ -90,8 +81,8 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
                             .put("CATEGORY", String.valueOf(i)));
         }
 
-        if (categories.length > 0)
-            this.openCategory(ref, store, ui, events, categories[0]);
+        if (Data.getCategories().length > 0)
+            this.openCategory(ref, store, ui, events, Data.getCategories()[0]);
     }
     private void openCategory(Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events, Category category) {
         this.category = category;
@@ -106,12 +97,9 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         ui.set(selector + "#Parent #SpellButton.TooltipText", spell.getDisplay().description());
         ui.set(selector + "#Parent #Icon.AssetPath", spell.getDisplay().icon().toString().replace('\\', '/'));
 
-
         events.addEventBinding(CustomUIEventBindingType.Activating, selector + "#Parent #SpellButton", EventData.of("ACTION", "spell").put("SPELL", spell.getUuid().toString()));
 
-        // commandBuilder.set(selector + "#CategoryIcon.AssetPath",
-        // "UI/Custom/Pages/Memories/categories/" + category + "Complete.png"
-        // );
+        spell.getSpell().build(spell, ref, store, ui, events, selector + "#Parent ");
 
         int i = 0;
         for (SpellContext child : spell.getChildren()) {
@@ -127,7 +115,7 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         ui.append("#Container", LAYOUT_EXPERIENCE_MAIN);
 
         List<Experience> experiences = new ArrayList<>();
-        for (Category category : categories) {
+        for (Category category : Data.getCategories()) {
             if (!experiences.contains(category.experience()))
                 experiences.add(category.experience());
         }
@@ -174,7 +162,7 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         }
     }
     private void handleDataEventCategory(Ref<EntityStore> ref, Store<EntityStore> store, SpellsUIEventData data) {
-        Category category = this.categories[Integer.valueOf(data.category)];
+        Category category = Data.getCategories()[Integer.valueOf(data.category)];
         UICommandBuilder ui = new UICommandBuilder();
         UIEventBuilder events = new UIEventBuilder();
         this.openCategory(ref, store, ui, events, category);
@@ -196,6 +184,8 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
     }
     private void handleDataEventSpell(Ref<EntityStore> ref, Store<EntityStore> store, SpellsUIEventData data) {
         SpellContext spell = category.getSpell(UUID.fromString(data.spell));
+
+        spell.getSpell().canApply(spell, ref, store);
 
         HySpellEnginePlugin.debugLog("Spell " + spell.getDisplay().name() + " clicked at " + category.display().name());
 
