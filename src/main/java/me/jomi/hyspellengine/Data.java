@@ -11,6 +11,18 @@ public class Data {
 
     public static void load() {
         categories = new Category[0]; // temp
+
+        try {
+            load0();
+        } catch (Throwable e) {
+        }
+
+        if (categories.length == 0)  {
+            ExampleData.makeExampleData();
+            save();
+        }
+    }
+    private static void load0() {
         // TODO
     }
     public static void save() {

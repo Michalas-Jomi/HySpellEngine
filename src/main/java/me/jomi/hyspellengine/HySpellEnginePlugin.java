@@ -3,20 +3,17 @@ package me.jomi.hyspellengine;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
-import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import me.jomi.hyspellengine.api.Experience;
-import me.jomi.hyspellengine.api.Spell;
 import me.jomi.hyspellengine.commands.SpellsCommand;
 import me.jomi.hyspellengine.core.ExperienceRegistry;
 import me.jomi.hyspellengine.core.SpellContext;
 import me.jomi.hyspellengine.core.SpellRegistry;
-import me.jomi.hyspellengine.spells.PermissionSpell;
-import me.jomi.hyspellengine.spells.StatsSpell;
+import me.jomi.hyspellengine.listeners.ParticleSpellTickingSystem;
+import me.jomi.hyspellengine.spells.*;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -30,6 +27,14 @@ import java.util.logging.Level;
  * @version 1.0.0
  */
 public class HySpellEnginePlugin extends JavaPlugin {
+    public static class Experiences {
+        public static final Experience combat = new Experience("Combat");
+        public static final Experience mining = new Experience("Mining");
+        public static final Experience moving = new Experience("Moving");
+        public static final Experience farming = new Experience("Farming");
+        public static final Experience dying = new Experience("Dying");
+    }
+
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private static HySpellEnginePlugin instance;
     private final SpellRegistry spellRegistry;
@@ -50,21 +55,31 @@ public class HySpellEnginePlugin extends JavaPlugin {
     protected void setup() {
         this.registerComponents();
         this.registerCommands();
+        this.registerSystems();
 
         this.registerExperiences();
         this.registerSpells();
     }
 
     private void registerExperiences() {
-        this.getExperienceRegistry().registerExperience(new Experience("Combat"));
-        this.getExperienceRegistry().registerExperience(new Experience("Farming"));
-        this.getExperienceRegistry().registerExperience(new Experience("Mining"));
-        this.getExperienceRegistry().registerExperience(new Experience("Moving"));
+        this.getExperienceRegistry().registerExperience(Experiences.combat);
+        this.getExperienceRegistry().registerExperience(Experiences.mining);
+        this.getExperienceRegistry().registerExperience(Experiences.moving);
+        this.getExperienceRegistry().registerExperience(Experiences.farming);
+        this.getExperienceRegistry().registerExperience(Experiences.dying);
     }
 
     private void registerSpells() {
         this.getSpellRegistry().registerSpell(new PermissionSpell());
         this.getSpellRegistry().registerSpell(new StatsSpell());
+        this.getSpellRegistry().registerSpell(new ParticleSpell());
+        this.getSpellRegistry().registerSpell(new TeleportSpell());
+        this.getSpellRegistry().registerSpell(new EqSpell());
+        this.getSpellRegistry().registerSpell(new CommandSpell());
+    }
+
+    private void registerSystems() {
+        this.getEntityStoreRegistry().registerSystem(new ParticleSpellTickingSystem());
     }
 
     private void registerCommands() {
@@ -75,6 +90,7 @@ public class HySpellEnginePlugin extends JavaPlugin {
     private void registerComponents() {
         registerComponent(SpellContext.SpellComponent.class, SpellContext.SpellComponent.CODEC);
         registerComponent(Experience.ExperienceComponent.class, Experience.ExperienceComponent.CODEC);
+        registerComponent(ParticleSpell.ParticleSpellComponent.class, ParticleSpell.ParticleSpellComponent.CODEC);
     }
     private <T extends Component<EntityStore>> void registerComponent(Class<T> clazz, BuilderCodec<T> codec) {
         ComponentType<EntityStore, T> type = getEntityStoreRegistry().registerComponent(

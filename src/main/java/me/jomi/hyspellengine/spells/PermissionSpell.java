@@ -21,12 +21,14 @@ public class PermissionSpell extends Spell {
     @Override
     public void apply(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store) {
         PlayerRef player = store.getComponent(ref, PlayerRef.getComponentType());
-        PermissionsModule.get().addUserPermission(player.getUuid(), Collections.singleton(permField.getValue(context)));
+        String perm = permField.getValue(context);
+        PermissionsModule.get().addUserPermission(player.getUuid(), Collections.singleton(perm));
     }
 
     @Override
     public void unapply(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store) {
         PlayerRef player = store.getComponent(ref, PlayerRef.getComponentType());
-        PermissionsModule.get().removeUserPermission(player.getUuid(), Collections.singleton(permField.getValue(context)));
+        String perm = permField.getValue(context);
+        PermissionsModule.get().removeUserPermission(player.getUuid(), Collections.singleton(perm));
     }
 }

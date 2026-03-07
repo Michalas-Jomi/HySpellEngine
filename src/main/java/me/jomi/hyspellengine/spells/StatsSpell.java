@@ -29,15 +29,18 @@ public class StatsSpell extends LeveledSpell {
 
     private final SpellField<double[]> levelsField;
     private final SpellField<Stats> statField;
+    private final SpellField<StaticModifier.CalculationType> methodField;
 
     public StatsSpell() {
         super("Stat", "Increase player stat");
         this.statField = this.requireFieldEnum("Stat", Stats.class);
         this.levelsField = this.requireField("levels", Codec.DOUBLE_ARRAY);
+        this.methodField = this.requireFieldEnum("method", StaticModifier.CalculationType.class);
     }
 
     @Override
     public void apply(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, int level) {
+        StaticModifier.CalculationType method = methodField.getValue(context);
         double[] boosts = this.levelsField.getValue(context);
         Stats stat = statField.getValue(context);
         double boost = boosts[level - 1];
@@ -46,7 +49,7 @@ public class StatsSpell extends LeveledSpell {
         stats.putModifier(
                 stat.index,
                 context.getUuid().toString(),
-                new StaticModifier(Modifier.ModifierTarget.MAX, StaticModifier.CalculationType.ADDITIVE, (float) boost));
+                new StaticModifier(Modifier.ModifierTarget.MAX, method, (float) boost));
     }
     @Override
     public void unapply(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store) {

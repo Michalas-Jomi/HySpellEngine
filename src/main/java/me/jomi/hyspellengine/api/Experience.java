@@ -9,8 +9,10 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import me.jomi.hyspellengine.HySpellEnginePlugin;
 import me.jomi.hyspellengine.core.ExperienceRegistry;
 import me.jomi.hyspellengine.utils.EasyCodec;
+import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonDouble;
+import org.bson.BsonInt32;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 public record Experience(String name) {
@@ -26,16 +28,16 @@ public record Experience(String name) {
 
         // Map<String, Double> experience.name : exp
         @EasyCodec.ForCodec public BsonDocument experiences = new BsonDocument();
+        // Map<String, [Integer, Integer]> experience.name : [points, spend points]
+        @EasyCodec.ForCodec public BsonDocument points = new BsonDocument();
 
         public double getExp(Experience experience) {
             return experiences.containsKey(experience.name()) ? experiences.getDouble(experience.name()).getValue() : 0;
         }
-
         public void addExp(Experience experience, double exp) {
             exp += this.getExp(experience);
             this.setExp(experience, exp);
         }
-
         public void setExp(Experience experience, double exp) {
             if (exp <= 0)
                 this.experiences.remove(experience.name());
@@ -43,12 +45,54 @@ public record Experience(String name) {
                 this.experiences.put(experience.name(), new BsonDouble(exp));
         }
 
+        private BsonArray ensureAndGetPoints(Experience experience) {
+            if (this.points.containsKey(experience.name()))
+                return this.points.getArray(experience.name());
+            BsonArray array = new BsonArray();
+            array.add(new BsonInt32(0));
+            array.add(new BsonInt32(0));
+            this.points.put(experience.name(), array);
+            return array;
+        }
+        // unspend + spend
+        public int getPoints(Experience experience) {
+            BsonArray array = this.ensureAndGetPoints(experience);
+            return array.get(0).asInt32().getValue();
+        }
+        public void addPoints(Experience experience, int points) {
+            BsonArray array = this.ensureAndGetPoints(experience);
+            int all = array.get(0).asInt32().getValue();
+            all += points;
+            array.set(0, new BsonInt32(all));
+        }
+        public void setPoints(Experience experience, int points) {
+            BsonArray array = this.ensureAndGetPoints(experience);
+            array.set(0, new BsonInt32(points));
+        }
+        public int getUnspendPoints(Experience experience) {
+            BsonArray array = this.ensureAndGetPoints(experience);
+            return Math.max(0, array.get(0).asInt32().getValue() - array.get(1).asInt32().getValue());
+        }
+        public int getSpendPoints(Experience experience) {
+            BsonArray array = this.ensureAndGetPoints(experience);
+            return array.get(1).asInt32().getValue();
+        }
+        public void addSpendPoints(Experience experience, int points) {
+            BsonArray array = this.ensureAndGetPoints(experience);
+            int spend = array.get(1).asInt32().getValue();
+            array.set(1, new BsonInt32(spend + points));
+        }
+        public void setSpendPoints(Experience experience, int points) {
+            BsonArray array = this.ensureAndGetPoints(experience);
+            array.set(1, new BsonInt32(points));
+        }
 
         @NullableDecl
         @Override
         public Component<EntityStore> clone() {
             ExperienceComponent copy = new ExperienceComponent();
             copy.experiences = this.experiences.clone();
+            copy.points = this.points.clone();
             return copy;
         }
     }
