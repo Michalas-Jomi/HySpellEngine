@@ -13,8 +13,11 @@ import org.bson.BsonDouble;
 import org.bson.BsonInt32;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
+import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class Experience {
     /**
@@ -83,6 +86,7 @@ public class Experience {
             BsonArray array = this.ensureAndGetPoints(experience);
             return Math.max(0, array.get(0).asInt32().getValue() - array.get(1).asInt32().getValue());
         }
+        // TODO rebuild to points from level + points from plugins
         public int getSpendPoints(Experience experience) {
             BsonArray array = this.ensureAndGetPoints(experience);
             return array.get(1).asInt32().getValue();
@@ -108,10 +112,13 @@ public class Experience {
     }
 
     private final String name;
+    private final String description;
     private boolean visible = false;
 
-    public Experience(String name) {
+    // TODO docs
+    public Experience(String name, String info, Predicate<String> keyValidator) {
         this.name = name;
+        this.description = info;
     }
 
     /// Easily access to Experience registry, use this in setup()
@@ -194,7 +201,7 @@ public class Experience {
         return le - 1 + (int) (exp / last.exp());
     }
 
-    protected Level[] getLevels() {
+    public Level[] getLevels() {
         return new Level[]{}; // TODO load from admin tool
     }
 
@@ -284,6 +291,20 @@ public class Experience {
     public String getName() {
         return name;
     }
+    /// Get Experience values description
+    public String getInfo() {
+        return this.description;
+    }
+
+    public Set<String> getValues() {
+        return null; // TODO
+    }
+    public boolean containsValues(String value) {
+        return true; // TODO
+    }
+    public void forEachValue(BiConsumer<String, Double> work) {
+        // TODO
+    }
 
     /// true if Experience has not level cap, configurable in admin-tool
     public boolean isInfinite() {
@@ -292,6 +313,14 @@ public class Experience {
             return true;
         return levels[levels.length - 1].infinite;
     }
+    /// exp needed for lever over cap, -1 if isInfinite() == false
+    public double getInfinityExp() {
+        if (!this.isInfinite())
+            return -1;
+        Level[] levels = this.getLevels();
+        return levels.length == 0 ? 0 : levels[levels.length - 1].exp;
+    }
+
 
     /// true means Experience is used in gui, false means ignored
     public boolean isVisible() {

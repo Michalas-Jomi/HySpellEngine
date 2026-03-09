@@ -15,7 +15,6 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.nio.file.Path;
-import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -139,7 +138,7 @@ public final class SpellContext {
         return children;
     }
     // fieldName : fieldData
-    public BsonDocument getFields() {
+    public BsonDocument getFieldsData() {
         return fields;
     }
     public UUID getUuid() {

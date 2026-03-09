@@ -1,0 +1,10 @@
+$F = "Fields.ui";
+
+Group #ExperienceLevelRoot {
+  LayoutMode: Top;
+  $F.@StringField #FieldExperience {
+    @Text = "exp";
+    @WidthLabel = 100;
+    @WidthInput = 300;
+  }
+}

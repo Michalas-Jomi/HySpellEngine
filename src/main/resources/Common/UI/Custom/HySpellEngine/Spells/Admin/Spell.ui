@@ -1,0 +1,52 @@
+$C = "../../../Common.ui";
+$F = "Fields.ui";
+
+Group #SpellAdminRoot {
+  Anchor: (Width: 200);
+  Background: #6600cc(0.5);
+
+  Group #NavGroup {
+    LayoutMode: Top;
+    Anchor: (Height: 40, Top: 0);
+    Group {
+      LayoutMode: Left;
+      TextButton #SaveButton {
+        Style: $F.@DefaultTextButtonStyle;
+        Anchor: (Width: 100);
+        Text: "Save";
+      }
+      TextButton #RemoveButton {
+        Style: $F.@DefaultTextButtonStyle;
+        Anchor: (Width: 100);
+        Text: "Delete";
+      }
+    }
+    Group {
+      LayoutMode: Left;
+      TextButton #AddChildButton {
+        Style: $F.@DefaultTextButtonStyle;
+        Anchor: (Width: 100);
+        Text: "Add Child";
+      }
+      TextButton #CancelButton {
+        Style: $F.@DefaultTextButtonStyle;
+        Anchor: (Width: 100);
+        Text: "Cancel";
+      }
+    }
+  }
+  Group #SpellSelectGroup {
+    Anchor: (Height: 20, Top: 40);
+    $C.@DropdownBox #SpellTypeInput {
+      Anchor: (Width: 200, Height: 20);
+    }
+  }
+  Group #DisplayGroup {
+    LayoutMode: Top;
+    Anchor: (Height: 60, Top: 60);
+  }
+  Group #FieldsGroup {
+    Anchor: (Top: 120);
+    LayoutMode: Top;
+  }
+}

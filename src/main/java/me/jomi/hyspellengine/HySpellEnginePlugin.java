@@ -1,13 +1,18 @@
 package me.jomi.hyspellengine;
 
+import com.hypixel.hytale.assetstore.AssetRegistry;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.asset.type.item.config.BlockGroup;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.npc.NPCPlugin;
 import me.jomi.hyspellengine.api.Experience;
+import me.jomi.hyspellengine.commands.SpellsAdminCommand;
 import me.jomi.hyspellengine.commands.SpellsCommand;
 import me.jomi.hyspellengine.core.ExperienceRegistry;
 import me.jomi.hyspellengine.core.SpellContext;
@@ -19,6 +24,7 @@ import me.jomi.hyspellengine.utils.PlayerPacketTracker;
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -29,12 +35,54 @@ import java.util.logging.Level;
  */
 public class HySpellEnginePlugin extends JavaPlugin {
     public static class Experiences {
-        public static final Experience combat = new Experience("Combat");
-        public static final Experience mining = new Experience("Mining");
-        public static final Experience moving = new Experience("Moving");
-        public static final Experience farming = new Experience("Farming");
-        public static final Experience dying = new Experience("Dying");
-        public static final Experience any = new Experience("All"); // TODO cancelable expGiveEvent
+        // TODO cancelable expGiveEvent
+        // TODO update listeners to exp
+        public static final Experience combat = new Experience(
+                "Combat",
+                "Role name\n* for everything\nPlayer for players",
+                str -> {
+            if ("*".equals(str))
+                return true;
+            if ("Player".equals(str))
+                return true;
+            return NPCPlugin.get().getIndex(str) != Integer.MIN_VALUE;
+        });
+        public static final Experience mining = new Experience(
+                "Mining",
+                "block id or block group name\n* for everything",
+                str -> {
+                    if ("*".equals(str))
+                        return true;
+                    if (null != AssetRegistry.getAssetStore(BlockGroup.class).getAssetMap().getAsset(str))
+                        return true;
+                    return null != AssetRegistry.getAssetStore(BlockType.class).getAssetMap().getAsset(str);
+                }
+        );
+        public static final Experience moving = new Experience(
+                "Moving",
+                 "moving / sprinting / jumping",
+                Set.of("moving", "sprinting", "jumping")::contains
+        );
+        public static final Experience farming = new Experience("Farming",
+                "block id or block group name\n* for everything farmable",
+                str -> {
+                    if ("*".equals(str))
+                        return true;
+                    if (null != AssetRegistry.getAssetStore(BlockGroup.class).getAssetMap().getAsset(str))
+                        return true;
+                    return null != AssetRegistry.getAssetStore(BlockType.class).getAssetMap().getAsset(str);
+                }
+        );
+        public static final Experience dying = new Experience(
+                "Dying",
+                "any value, used willbe first entry",
+                str -> true
+        );
+        public static final Experience any = new Experience(
+                "All",
+                "other experience name",
+                str -> HySpellEnginePlugin.getInstance().getExperienceRegistry().getKeys().contains(str)
+        );
     }
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
@@ -93,6 +141,7 @@ public class HySpellEnginePlugin extends JavaPlugin {
 
     private void registerCommands() {
         this.getCommandRegistry().registerCommand(new SpellsCommand());
+        this.getCommandRegistry().registerCommand(new SpellsAdminCommand());
     }
 
     private Map<Class<? extends Component<EntityStore>>, ComponentType<EntityStore, ? extends Component<EntityStore>>> componentTypeMap = new HashMap<>();
@@ -130,8 +179,8 @@ public class HySpellEnginePlugin extends JavaPlugin {
         return this.experienceRegistry;
     }
 
-    public static void debugLog(String msg) {
-        HySpellEnginePlugin.log(msg);
+    public static void debugLog(Object msg) {
+        HySpellEnginePlugin.log("[DEBUG]: " + msg);
     }
     public static void log(String msg) {
         LOGGER.at(Level.INFO).log(msg);

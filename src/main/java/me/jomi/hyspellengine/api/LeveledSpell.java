@@ -2,6 +2,8 @@ package me.jomi.hyspellengine.api;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
+import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import me.jomi.hyspellengine.HySpellEnginePlugin;
 import me.jomi.hyspellengine.core.SpellContext;
@@ -69,5 +71,13 @@ public abstract class LeveledSpell extends Spell {
 
         this.apply(context, ref, store, level);
         this.setExtra(context, ref, store, "level", level);
+    }
+
+    @Override
+    public void build(SpellContext spellContext, Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events, String selector) {
+        super.build(spellContext, ref, store, ui, events, selector);
+
+        ui.append(selector + "#SpellRoot", "HySpellEngine/Spells/SpellLevel.ui");
+        ui.set(selector + "#SpellRoot #LevelLabel.Text", this.getLevel(spellContext, ref, store) + "/" + this.maxLevelField.getValue(spellContext));
     }
 }

@@ -1,0 +1,79 @@
+$C = "../../../Common.ui";
+$F = "Fields.ui";
+
+Group #ExperienceLevelsRoot {
+  Anchor: (Width: 400, Height: 800, Right: 10);
+  Background: #FF6666;
+  FlexWeight: 1;
+  LayoutMode: TopScrolling;
+  ScrollbarStyle: $C.@DefaultScrollbarStyle;
+
+  Group #TitleGroup {
+    LayoutMode: Top;
+    Label #Title {
+      Anchor: (Height: 32);
+      Text: "Levels";
+      Style: (
+        FontSize: 18,
+        TextColor: #ffffff,
+        RenderBold: true,
+        HorizontalAlignment: Center
+      );
+    }
+    Label #Description {
+      Style: (
+        FontSize: 16,
+        TextColor: #ffffff
+      );
+    }
+  }
+  Group #Levels {
+    LayoutMode: Top;
+  }
+  Group #ButtonGroup {
+    LayoutMode: Center;
+    TextButton #AddButton {
+      Style: $C.@DefaultTextButtonStyle;
+      Text: "Add";
+      Anchor: (Height: 30, Width: 400);
+    }
+  }
+  Group #InfinityGroup {
+    LayoutMode: Top;
+    Group {
+      LayoutMode: Left;
+      Label #InfinityLabel {
+        Style: (
+          FontSize: 16,
+          TextColor: #ffffff
+        );
+        Text: "Infinite";
+      }
+      $C.@CheckBox #CheckBox {
+        Anchor: (Width: 20, Height: 20, Left: 10);
+      }
+    }
+    Group #ExperienceInfinityGroup {
+      Visible: false;
+      LayoutMode: Left;
+      Label #LevelLabel {
+        Anchor: (Width: 200);
+        Style: (
+          TextColor: #009900,
+          FontSize: $F.@FontSize
+        );
+        Text: "Exp per level";
+      }
+      CompactTextField #Input {
+        Style: (
+          TextColor: #FF9900,
+          FontSize: $F.@FontSize
+        );
+        PlaceholderText: "exp";
+
+        CollapsedWidth: 200;
+        ExpandedWidth: 200;
+      }
+    }
+  }
+}

@@ -11,11 +11,16 @@ import me.jomi.hyspellengine.HySpellEnginePlugin;
 import me.jomi.hyspellengine.core.SpellContext;
 import me.jomi.hyspellengine.core.SpellField;
 import me.jomi.hyspellengine.core.SpellRegistry;
+import me.jomi.hyspellengine.spells.StatsSpell;
+import me.jomi.hyspellengine.utils.Adapter;
 import org.bson.*;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /**
  * Spell mechanics</br>
@@ -24,12 +29,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * supports learn/unlearn mechanic
  * 
  * @see SpellContext
- * @see Spell#requireField(String, Codec)
+ * @see Spell#requireField(String, Codec, Function, Function)
  * @see Spell#getExtra(SpellContext, Ref, Store, String) 
  */
 public abstract class Spell {
-    private final String name;
-    private final String description;
+    protected final String name;
+    protected final String description;
     private final Map<String, SpellField<?>> fields = new ConcurrentHashMap<>();
 
     /**
@@ -186,49 +191,81 @@ public abstract class Spell {
 
     // TODO Predicate<String> validator
     // TODO String description
+    // TODO
     /**
-     * SpellFields are per spell data
-     * use in constructor
+     * SpellFields are per spell data</br>
+     * use it in constructor
      *
      * @param name unique key
      * @param codec Codec
      * @return spell field container
      * @param <T> data type
      */
-    protected <T> SpellField<T> requireField(String name, Codec<T> codec) {
-        SpellField<T> field = new SpellField<>(name, codec);
+    protected final <T> SpellField<T> requireField(String name, Codec<T> codec, Function<T, String> asString, Function<String, T> fromString) {
+        SpellField<T> field = new SpellField<>(name, codec, asString, fromString);
         this.fields.put(name, field);
         return field;
     }
-    /**
-     * @see Spell#requireField(String, Codec)
-     */
-    protected SpellField<String> requireFieldString(String name) {
-        return this.requireField(name, Codec.STRING);
+    protected final <T> SpellField<T> requireField(String name, Codec<T> codec, Function<String, T> fromString) {
+        return this.requireField(name, codec, String::valueOf, fromString);
     }
     /**
-     * @see Spell#requireField(String, Codec)
+     * @see Spell#requireField(String, Codec, Function, Function)
      */
-    protected SpellField<Integer> requireFieldInt(String name) {
-        return this.requireField(name, Codec.INTEGER);
+    protected final SpellField<String> requireFieldString(String name) {
+        return this.requireField(name, Codec.STRING, s -> s);
     }
     /**
-     * @see Spell#requireField(String, Codec)
+     * @see Spell#requireField(String, Codec, Function, Function)
      */
-    protected SpellField<Double> requireFieldDouble(String name) {
-        return this.requireField(name, Codec.DOUBLE);
+    protected final SpellField<Integer> requireFieldInt(String name) {
+        return this.requireField(name, Codec.INTEGER, Integer::parseInt);
     }
     /**
-     * @see Spell#requireField(String, Codec)
+     * @see Spell#requireField(String, Codec, Function, Function)
      */
-    protected SpellField<Boolean> requireFieldBoolean(String name) {
-        return this.requireField(name, Codec.BOOLEAN);
+    protected final SpellField<Double> requireFieldDouble(String name) {
+        return this.requireField(name, Codec.DOUBLE, Double::parseDouble);
     }
     /**
-     * @see Spell#requireField(String, Codec)
+     * @see Spell#requireField(String, Codec, Function, Function)
      */
-    protected <E extends Enum<E>> SpellField<E> requireFieldEnum(String name, Class<E> eClass) {
-        return this.requireField(name, new EnumCodec<>(eClass));
+    protected final SpellField<Boolean> requireFieldBoolean(String name) {
+        return this.requireField(name, Codec.BOOLEAN, Boolean::parseBoolean);
+    }
+    /**
+     * @see Spell#requireField(String, Codec, Function, Function)
+     */
+    protected final <E extends Enum<E>> SpellField<E> requireFieldEnum(String name, Class<E> eClass) {
+        return this.requireField(name, new EnumCodec<>(eClass), str -> {
+            try {
+                return Adapter.cast(eClass.getMethod("valueOf", String.class).invoke(null, str));
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    /** Returns required fields for spell
+     * @see Spell#requireField(String, Codec, Function, Function)
+     */
+    public final Collection<SpellField<?>> getFields() {
+        return this.fields.values();
+    }
+    /** Returns required fields ids
+     * @see Spell#requireField(String, Codec, Function, Function)
+     */
+    public final Set<String> getFieldsKeys() {
+        return this.fields.keySet();
+    }
+    /**
+     * Not recommended to use
+     * @param name SpellField name
+     * @return SpellField registered with requireField
+     * @see Spell#requireField(String, Codec, Function, Function)
+     */
+    public final SpellField<?> getField(String name) {
+        return this.fields.get(name);
     }
 
     /// @return spell Name

@@ -4,7 +4,7 @@ $C = "../../Common.ui";
   Style: $C.@DefaultTextButtonStyle;
 };
 
-$C.@DecoratedContainer {
+$C.@PageOverlay { $C.@DecoratedContainer {
   @CloseButton = true;
   Anchor: (Width: 1600, Height: 983);
 
@@ -31,4 +31,4 @@ $C.@DecoratedContainer {
       Anchor: (Top: 20);
     }
   }
-}
+}}

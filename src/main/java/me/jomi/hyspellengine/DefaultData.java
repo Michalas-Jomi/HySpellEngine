@@ -56,7 +56,7 @@ public class DefaultData {
                             "Cat1 desc",
                             null
                     ),
-                    new Experience("Exp1"),
+                    HySpellEnginePlugin.Experiences.combat,
                     root
             );
         }
@@ -76,7 +76,7 @@ public class DefaultData {
                         "Cat desc",
                         Path.of("Sky", "Void.png")
                 ),
-                new Experience("Exp " + id++),
+                HySpellEnginePlugin.Experiences.combat,
                 root
         );
     }

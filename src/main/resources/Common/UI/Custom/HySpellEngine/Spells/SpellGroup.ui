@@ -1,7 +1,7 @@
 Group #SpellGroup {
   LayoutMode: Top;
   Group #Parent {
-    Anchor: (Height: 100);
+    //Anchor: (Height: 100); // uncomment = LayoutMode: topScrolling in Admin/Spell.ui #SpellAdminRoot
     LayoutMode: Center;
   }
   Group #Children {

@@ -1,0 +1,23 @@
+$C = "../../../Common.ui";
+$F = "Fields.ui";
+
+@BorderSize = 4;
+@DropdownBoxStyle = DropdownBoxStyle(
+  ...$C.@DefaultDropdownBoxStyle,
+  HorizontalPadding: 0,
+  EntryHeight: 18,
+  DefaultBackground: (TexturePath: "../../../Common/Dropdown.png", Border: @BorderSize),
+  HoveredBackground: (TexturePath: "../../../Common/DropdownHovered.png", Border: @BorderSize),
+  PressedBackground: (TexturePath: "../../../Common/DropdownPressed.png", Border: @BorderSize),
+);
+
+$F.@Field {
+  @Text = "";
+
+  #InputGroup {
+    $C.@DropdownBox #Input {
+      Anchor: (Width: 140, Height: 20);
+      Style: @DropdownBoxStyle;
+    }
+  }
+}

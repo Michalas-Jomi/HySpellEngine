@@ -38,6 +38,7 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         @EasyCodec.ForCodec public String category;
         @EasyCodec.ForCodec public String tab;
         @EasyCodec.ForCodec public String spell; // UUID
+        @EasyCodec.ForCodec public String experience;
 
     }
     public static final String LAYOUT_MAIN = "HySpellEngine/Spells/Main.ui";
@@ -48,7 +49,7 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
     public static final String LAYOUT_EXPERIENCE = "HySpellEngine/Spells/Experience.ui";
     public static final String LAYOUT_EXPERIENCE_MAIN = "HySpellEngine/Spells/Experiences.ui";
 
-    private Category category;
+    protected Category category;
 
     public SpellsUIPage(@NonNullDecl PlayerRef playerRef) {
         super(playerRef, CustomPageLifetime.CanDismissOrCloseThroughInteraction, SpellsUIEventData.CODEC);
@@ -65,7 +66,7 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         events.addEventBinding(CustomUIEventBindingType.Activating, "#ExpButton", EventData.of("ACTION", "tab").put("TAB", "exp"));
     }
 
-    private void openSpells(Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events) {
+    protected void openSpells(Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events) {
         ui.clear("#Container");
         ui.append("#Container", LAYOUT_SPELLS);
 
@@ -83,16 +84,16 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         }
 
         if (Data.getCategories().length > 0)
-            this.openCategory(ref, store, ui, events, Data.getCategories()[0]);
+            this.openCategory(ref, store, ui, events, category != null ? category : Data.getCategories()[0]);
     }
-    private void openCategory(Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events, Category category) {
+    protected void openCategory(Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events, Category category) {
         this.category = category;
 
         ui.clear("#Spells");
         ui.append("#Spells", LAYOUT_SPELL_GROUP);
         this.addSpell(ref, store, ui, events, category.root(), "#Spells ");
     }
-    private void addSpell(Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events, SpellContext spell, String selector) {
+    protected void addSpell(Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events, SpellContext spell, String selector) {
         ui.append(selector + "#Parent", LAYOUT_SPELL);
         ui.set(selector + "#Parent #SpellButton.Text", spell.getDisplay().name());
         ui.set(selector + "#Parent #SpellButton.TooltipText", spell.getDisplay().description());
@@ -118,9 +119,7 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         }
     }
 
-    private void openExperiences(Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events) {
-        this.category = null;
-
+    protected void openExperiences(Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events) {
         ui.clear("#Container");
         ui.append("#Container", LAYOUT_EXPERIENCE_MAIN);
 
@@ -130,38 +129,40 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
                 experiences.add(category.experience());
         }
 
-        int i = -1;
+        int i = 0;
         for (Experience experience : experiences) {
             if (!experience.isVisible())
                 continue;
-
-            int lvl = experience.getLevel(ref, store);
-            double exp = experience.getExp(ref, store);
-            double nextExp = experience.getExpForNextLevel(ref, store);
-            double percent = 1;
-
-
-            String visibleExp;
-            if (nextExp == -1) {
-                visibleExp = "MAX";
-            } else {
-                double previousExp = lvl == 0 ? 0 : experience.getExpNeededForLevel(lvl - 1);
-                visibleExp = (nextExp - previousExp) + " / " + (exp - previousExp);
-                if (exp - previousExp == 0)
-                    percent = 0;
-                else
-                    percent = (nextExp - previousExp) / (exp - previousExp);
-                percent *= 100;
-                visibleExp += " (" + ((int) percent) + "%)";
-            }
-
             ui.append("#Experiences", LAYOUT_EXPERIENCE);
-            String selector = "#Experiences[" + ++i + "] ";
-            ui.set(selector + "#ExperienceNameLabel.Text", experience.getName());
-            ui.set(selector + "#ExperienceLevelLabel.Text", lvl + " lv");
-            ui.set(selector + "#ExperienceExpLabel.Text", visibleExp);
-            ui.set(selector + "#ProgressBar.Value", (float) percent);
+            String selector = "#Experiences[" + i++ + "] ";
+            this.openExperience(ref, store, ui, events, experience, selector);
         }
+    }
+    protected void openExperience(Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events, Experience experience, String selector) {
+        int lvl = experience.getLevel(ref, store);
+        double exp = experience.getExp(ref, store);
+        double nextExp = experience.getExpForNextLevel(ref, store);
+        double percent = 1;
+
+
+        String visibleExp;
+        if (nextExp == -1) {
+            visibleExp = "MAX";
+        } else {
+            double previousExp = lvl == 0 ? 0 : experience.getExpNeededForLevel(lvl - 1);
+            visibleExp = (nextExp - previousExp) + " / " + (exp - previousExp);
+            if (exp - previousExp == 0)
+                percent = 0;
+            else
+                percent = (nextExp - previousExp) / (exp - previousExp);
+            percent *= 100;
+            visibleExp += " (" + ((int) percent) + "%)";
+        }
+
+        ui.set(selector + "#ExperienceNameLabel.Text", experience.getName());
+        ui.set(selector + "#ExperienceLevelLabel.Text", lvl + " lv");
+        ui.set(selector + "#ExperienceExpLabel.Text", visibleExp);
+        ui.set(selector + "#ProgressBar.Value", (float) percent);
     }
 
     @Override
@@ -174,14 +175,14 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
             default         -> throw new IllegalStateException("Unexpected action value: " + data.action);
         }
     }
-    private void handleDataEventCategory(Ref<EntityStore> ref, Store<EntityStore> store, SpellsUIEventData data) {
+    protected void handleDataEventCategory(Ref<EntityStore> ref, Store<EntityStore> store, SpellsUIEventData data) {
         Category category = Data.getCategories()[Integer.valueOf(data.category)];
         UICommandBuilder ui = new UICommandBuilder();
         UIEventBuilder events = new UIEventBuilder();
         this.openCategory(ref, store, ui, events, category);
         this.sendUpdate(ui, events, false);
     }
-    private void handleDataEventTab(Ref<EntityStore> ref, Store<EntityStore> store, SpellsUIEventData data) {
+    protected void handleDataEventTab(Ref<EntityStore> ref, Store<EntityStore> store, SpellsUIEventData data) {
         UICommandBuilder ui = new UICommandBuilder();
         UIEventBuilder events = new UIEventBuilder();
 
@@ -195,11 +196,13 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
 
         this.sendUpdate(ui, events, false);
     }
-    private void handleDataEventSpell(Ref<EntityStore> ref, Store<EntityStore> store, SpellsUIEventData data) {
+    protected void handleDataEventSpell(Ref<EntityStore> ref, Store<EntityStore> store, SpellsUIEventData data) {
         SpellContext spell = category.getSpell(UUID.fromString(data.spell));
 
         Experience.ExperienceComponent exp = spell.getCategory().experience().getComponent(ref, store);
 
+        UICommandBuilder ui = new UICommandBuilder();
+        UIEventBuilder events = new UIEventBuilder();
         //if (exp.getUnspendPoints(spell.getCategory().experience()) <= 0) // TODO uncomment
             if (spell.isParentLearned(ref, store) && spell.getSpell().canApply(spell, ref, store)) {
                 String action = " used ";
@@ -214,16 +217,13 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
                 spell.getSpell().apply(spell, ref, store);
                 HySpellEnginePlugin.log(playerRef.getUsername() + action + spell.getDisplay().name() + " spell in " + spell.getCategory().display().name());
 
-                if (!spell.getSpell().canApply(spell, ref, store)) {
-                    UICommandBuilder ui = new UICommandBuilder();
-                    ui.set(data.selector + "#Parent #SpellButton.Disabled", true);
-                    sendUpdate(ui, false);
-                    return;
-                }
+                ui.clear(data.selector.trim());
+                ui.append(data.selector.trim(), LAYOUT_SPELL_GROUP);
+                this.addSpell(ref, store, ui, events, spell, data.selector);
             }
 
         HySpellEnginePlugin.debugLog("Spell " + spell.getDisplay().name() + " clicked at " + category.display().name());
 
-        sendUpdate();
+        sendUpdate(ui, events, false);
     }
 }

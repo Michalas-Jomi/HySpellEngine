@@ -12,6 +12,8 @@ import me.jomi.hyspellengine.api.LeveledSpell;
 import me.jomi.hyspellengine.core.SpellContext;
 import me.jomi.hyspellengine.core.SpellField;
 
+import java.util.Arrays;
+
 public class StatsSpell extends LeveledSpell {
     public static enum Stats {
         Health(DefaultEntityStatTypes.getHealth()),
@@ -34,7 +36,10 @@ public class StatsSpell extends LeveledSpell {
     public StatsSpell() {
         super("Stat", "Increase player stat");
         this.statField = this.requireFieldEnum("Stat", Stats.class);
-        this.levelsField = this.requireField("levels", Codec.DOUBLE_ARRAY);
+        this.levelsField = this.requireField("levels", Codec.DOUBLE_ARRAY,
+                array -> String.join(", ", Arrays.stream(array).mapToObj(String::valueOf).toList()),
+                str -> Arrays.stream(str.split(",")).map(String::trim).mapToDouble(Double::parseDouble).toArray()
+        );
         this.methodField = this.requireFieldEnum("method", StaticModifier.CalculationType.class);
     }
 

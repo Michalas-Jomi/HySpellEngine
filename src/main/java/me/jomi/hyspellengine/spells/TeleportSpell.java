@@ -20,7 +20,7 @@ public class TeleportSpell extends RepeatableSpell {
     private final SpellField<Double> zField;
 
     public TeleportSpell() {
-        super("teleportTo", "repeatable, teleport player to selected location");
+        super("teleport to", "repeatable, teleport player to selected location");
         this.worldField = this.requireFieldString("world");
         this.xField = this.requireFieldDouble("x offset");
         this.yField = this.requireFieldDouble("y offset");

@@ -1,0 +1,17 @@
+$F = "Fields.ui";
+
+$F.@Field {
+  @Text = "";
+  #InputGroup {
+    CompactTextField #Input {
+      Style: (
+        TextColor: #ffffff,
+        FontSize: $F.@FontSize
+      );
+      PlaceholderText: @Text;
+
+      CollapsedWidth: 140;
+      ExpandedWidth: 140;
+    }
+  }
+}

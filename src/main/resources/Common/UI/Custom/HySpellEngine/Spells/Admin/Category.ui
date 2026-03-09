@@ -1,0 +1,35 @@
+$C = "../../../Common.ui";
+$F = "Fields.ui";
+
+Group #CategoryRoot {
+  Anchor: (Width: 250);
+  LayoutMode: Top;
+  Group #NavGroup {
+    LayoutMode: Top;
+    Group {
+      LayoutMode: Left;
+      TextButton #CancelButton {
+        Style: $F.@DefaultTextButtonStyle;
+        Anchor: (Width: 125);
+        Text: "Cancel";
+      }
+      TextButton #RemoveButton {
+        Style: $F.@DefaultTextButtonStyle;
+        Anchor: (Width: 125);
+        Text: "Delete";
+      }
+    }
+    TextButton #SaveButton {
+      Style: $F.@DefaultTextButtonStyle;
+      Text: "Save";
+    }
+  }
+  Group #ExperienceGroup {
+    $C.@DropdownBox #ExperienceInput {
+      Anchor: (Width: 250, Height: 20);
+    }
+  }
+  Group #DisplayGroup {
+    LayoutMode: Top;
+  }
+}

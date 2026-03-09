@@ -1,0 +1,25 @@
+$F = "Fields.ui";
+
+Group #ExperienceValueRoot {
+  LayoutMode: Left;
+  CompactTextField #InputKey {
+    Style: (
+      TextColor: #009900,
+      FontSize: $F.@FontSize
+    );
+    PlaceholderText: "key";
+
+    CollapsedWidth: 200;
+    ExpandedWidth: 200;
+  }
+  CompactTextField #InputValue {
+    Style: (
+      TextColor: #FF9900,
+      FontSize: $F.@FontSize
+    );
+    PlaceholderText: "exp";
+
+    CollapsedWidth: 200;
+    ExpandedWidth: 200;
+  }
+}

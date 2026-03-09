@@ -1,0 +1,66 @@
+$C = "../../../Common.ui";
+
+@FontSize = 14;
+@DefaultButtonLabelStyle = LabelStyle(
+  FontSize: @FontSize,
+  TextColor: #bfcdd5,
+  RenderBold: true,
+  RenderUppercase: true,
+  HorizontalAlignment: Center,
+  VerticalAlignment: Center
+);
+
+@ButtonBorder = 4;
+@DefaultTextButtonStyle = TextButtonStyle(
+  Default: (LabelStyle: @DefaultButtonLabelStyle, Background: PatchStyle(TexturePath: "../../../Common/Buttons/Primary.png", VerticalBorder: @ButtonBorder, HorizontalBorder: @ButtonBorder)),
+  Hovered: (LabelStyle: @DefaultButtonLabelStyle, Background: PatchStyle(TexturePath: "../../../Common/Buttons/Primary_Hovered.png", VerticalBorder: @ButtonBorder, HorizontalBorder: @ButtonBorder)),
+  Pressed: (LabelStyle: @DefaultButtonLabelStyle, Background: PatchStyle(TexturePath: "../../../Common/Buttons/Primary_Pressed.png", VerticalBorder: @ButtonBorder, HorizontalBorder: @ButtonBorder)),
+  Disabled: (LabelStyle: @DefaultButtonLabelStyle, Background: PatchStyle(TexturePath: "../../../Common/Buttons/Disabled.png", VerticalBorder: @ButtonBorder, HorizontalBorder: @ButtonBorder)),
+  Sounds: $C.@ButtonSounds,
+);
+
+@DisplayLabelStyle = LabelStyle(
+  ...@DefaultButtonLabelStyle,
+  TextColor: #CC9900,
+  RenderBold: false,
+  RenderUppercase: false
+);
+@FieldLabelStyle = LabelStyle(
+  ...@DisplayLabelStyle,
+  TextColor: #009900
+);
+
+@Field = Group {
+  @Text = "";
+  @WidthLabel = 60;
+  @WidthInput = 140;
+
+  LayoutMode: Left;
+  Anchor: (Width: @WidthLabel + @WidthInput, Height: 20);
+
+  Label #FieldLabel {
+    Anchor: (Width: @WidthLabel, Left: 0);
+    Text: @Text;
+    Style: @DisplayLabelStyle;
+  }
+
+  Group #InputGroup {
+    Anchor: (Width: @WidthInput, Right: 0);
+  }
+};
+
+@StringField = Group { @Field {
+  @Text = "";
+  #InputGroup {
+    CompactTextField #Input {
+      Style: (
+        TextColor: #ffffff,
+        FontSize: @FontSize
+      );
+      PlaceholderText: @Text;
+
+      CollapsedWidth: 140;
+      ExpandedWidth: 140;
+    }
+  }
+}};

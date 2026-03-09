@@ -1,9 +1,12 @@
 package me.jomi.hyspellengine.core;
 
 import me.jomi.hyspellengine.api.Experience;
+import me.jomi.hyspellengine.api.Spell;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 
 public class ExperienceRegistry {
     private final Map<String, Experience> registry = new ConcurrentHashMap<>();
@@ -21,5 +24,13 @@ public class ExperienceRegistry {
 
     public Experience getExperience(String name) {
         return this.registry.get(name);
+    }
+
+    public Set<String> getKeys() {
+        return this.registry.keySet();
+    }
+
+    public void forEach(BiConsumer<String, Experience> work) {
+        this.registry.forEach(work);
     }
 }

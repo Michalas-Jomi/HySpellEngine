@@ -1,16 +1,17 @@
 Group #ExperienceRoot {
   Padding: (Vertical: 10);
+  LayoutMode: Top;
   Group {
-    Anchor: (Width: 800, Height: 120);
+    Anchor: (Width: 700, Height: 120);
     Padding: (Top: 10, Bottom: 10);
     Background: #1a1a2e(0.95);
     LayoutMode: Top;
 
     Group {
-      Anchor: (Width: 800, Height: 30);
+      Anchor: (Width: 700, Height: 30);
       Label #ExperienceNameLabel {
         Text: "Experience name";
-        Anchor: (Width: 700, Height: 30, Top: 0);
+        Anchor: (Width: 600, Height: 30, Top: 0);
         Style: (
           FontSize: 14,
           TextColor: #ffffff,
@@ -29,10 +30,10 @@ Group #ExperienceRoot {
       }
     }
     Group {
-      Anchor: (Width: 800, Height: 60);
+      Anchor: (Width: 700, Height: 60);
       LayoutMode: Center;
       Group {
-        Anchor: (Width: 600, Height: 30);
+        Anchor: (Width: 500, Height: 30);
         Background: "../../Common/ProgressBar.png";
         ProgressBar #ProgressBar {
           BarTexturePath: "../../Common/ProgressBarFill.png";
@@ -44,7 +45,7 @@ Group #ExperienceRoot {
       }
     }
     Group {
-      Anchor: (Width: 800, Height: 10);
+      Anchor: (Width: 700, Height: 10);
       LayoutMode: Center;
       Label #ExperienceExpLabel {
         Text: "-1 lv";

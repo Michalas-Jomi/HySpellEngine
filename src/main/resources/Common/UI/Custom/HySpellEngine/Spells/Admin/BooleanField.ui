@@ -1,0 +1,12 @@
+$C = "../../../Common.ui";
+$F = "Fields.ui";
+
+$F.@Field {
+  @Text = "";
+  #InputGroup {
+    LayoutMode: Center;
+    $C.@CheckBox #Input {
+      Anchor: (Width: 20, Height: 20);
+    }
+  }
+}
