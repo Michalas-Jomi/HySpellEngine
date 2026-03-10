@@ -66,4 +66,9 @@ public class StatsSpell extends LeveledSpell {
                 context.getUuid().toString()
         );
     }
+
+    @Override
+    public boolean validate(SpellContext context) throws Throwable {
+        return this.levelsField.getValue(context).length == this.maxLevelField.getValue(context);
+    }
 }

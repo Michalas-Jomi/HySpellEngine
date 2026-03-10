@@ -1,5 +1,6 @@
 package me.jomi.hyspellengine.ui;
 
+import com.hypixel.hytale.assetstore.AssetRegistry;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -39,6 +40,8 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         @EasyCodec.ForCodec public String tab;
         @EasyCodec.ForCodec public String spell; // UUID
         @EasyCodec.ForCodec public String experience;
+        @EasyCodec.ForCodec public String meta;
+        @EasyCodec.ForCodec(dynamic = true) public String value;
 
     }
     public static final String LAYOUT_MAIN = "HySpellEngine/Spells/Main.ui";
@@ -70,21 +73,26 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         ui.clear("#Container");
         ui.append("#Container", LAYOUT_SPELLS);
 
-        int i = -1;
+        int i = 0;
         for (Category category : Data.getCategories()) {
             ui.append("#Categories", LAYOUT_CATEGORY);
-            String selector = "#Categories[" + ++i + "] ";
-            ui.set(selector + "#CategoryButton.Text", category.display().name());
-            ui.set(selector + "#CategoryButton.TooltipText", category.display().description());
-            ui.set(selector + "#Icon.AssetPath", category.display().icon().toString().replace('\\', '/'));
-
-            events.addEventBinding(CustomUIEventBindingType.Activating, selector + "#CategoryButton",
-                    EventData.of("ACTION", "category")
-                            .put("CATEGORY", String.valueOf(i)));
+            this.addCategory(ui, events, category, i++);
         }
 
         if (Data.getCategories().length > 0)
             this.openCategory(ref, store, ui, events, category != null ? category : Data.getCategories()[0]);
+    }
+    protected void addCategory(UICommandBuilder ui, UIEventBuilder events, Category category, int index) {
+        String selector = "#Categories[" + index + "] ";
+
+        ui.set(selector + "#CategoryButton.Text", category.display().name());
+        ui.set(selector + "#CategoryButton.TooltipText", category.display().description());
+        ui.set(selector + "#Icon.AssetPath", category.display().icon().toString().replace('\\', '/'));
+
+        events.addEventBinding(CustomUIEventBindingType.Activating, selector + "#CategoryButton",
+                EventData.of("ACTION", "category")
+                        .put("CATEGORY", String.valueOf(index)));
+
     }
     protected void openCategory(Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events, Category category) {
         this.category = category;

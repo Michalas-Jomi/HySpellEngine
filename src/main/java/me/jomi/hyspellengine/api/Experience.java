@@ -14,6 +14,7 @@ import org.bson.BsonInt32;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -294,6 +295,16 @@ public class Experience {
     /// Get Experience values description
     public String getInfo() {
         return this.description;
+    }
+
+
+    public double findBest(Predicate<String> test) {
+        AtomicReference<Double> max = new AtomicReference<>((double) 0);
+        this.forEachValue((key, exp) -> {
+            if (exp > max.get() && test.test(key))
+                max.set(exp);
+        });
+        return max.get();
     }
 
     public Set<String> getValues() {

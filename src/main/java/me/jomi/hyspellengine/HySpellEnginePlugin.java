@@ -169,7 +169,6 @@ public class HySpellEnginePlugin extends JavaPlugin {
 
     @Override
     protected void shutdown() {
-        instance = null;
     }
 
     public SpellRegistry getSpellRegistry() {
@@ -180,7 +179,7 @@ public class HySpellEnginePlugin extends JavaPlugin {
     }
 
     public static void debugLog(Object msg) {
-        HySpellEnginePlugin.log("[DEBUG]: " + msg);
+        HySpellEnginePlugin.log("[DEBUG]: \"" + msg + "\"");
     }
     public static void log(String msg) {
         LOGGER.at(Level.INFO).log(msg);

@@ -18,7 +18,28 @@ public class DefaultData {
         Data.addCategory(categoryCombat());
     }
     private static Category categoryCombat() {
-
+        SpellContext child1 = new SpellContext(
+                Spell.getSpellRegistry().getSpell("Stat"),
+                new SpellContext.Display(
+                        "Growth 2",
+                        "Make your bones stronger",
+                        Path.of("Icons", "CraftingCategories", "Alchemy", "Combat_Potions.png")
+                ),
+                UUID.randomUUID(),
+                BsonDocument.parse("{\"Stat\":\"Health\",\"levels\":[10.0, 20.0, 30.0],\"method\":\"Additive\",\"max level\":3}"),
+                new SpellContext[0]
+        );
+        SpellContext child2 = new SpellContext(
+                Spell.getSpellRegistry().getSpell("Stat"),
+                new SpellContext.Display(
+                        "Growth 3",
+                        "Make your bones stronger",
+                        Path.of("Icons", "CraftingCategories", "Alchemy", "Combat_Potions.png")
+                ),
+                UUID.randomUUID(),
+                BsonDocument.parse("{\"Stat\":\"Health\",\"levels\":[10.0, 20.0, 30.0],\"method\":\"Additive\",\"max level\":3}"),
+                new SpellContext[0]
+        );
 
         SpellContext root = new SpellContext(
                 Spell.getSpellRegistry().getSpell("Stat"),
@@ -29,7 +50,7 @@ public class DefaultData {
                 ),
                 UUID.randomUUID(),
                 BsonDocument.parse("{\"Stat\":\"Health\",\"levels\":[10.0, 20.0, 30.0],\"method\":\"Additive\",\"max level\":3}"),
-                new SpellContext[0]
+                new SpellContext[]{child1, child2}
         );
 
 

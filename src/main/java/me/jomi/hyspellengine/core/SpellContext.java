@@ -15,6 +15,7 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -24,7 +25,7 @@ import java.util.UUID;
  * @see Spell
  * @see Spell#getExtra(SpellContext, Ref, Store, String)
  */
-public final class SpellContext {
+public final class SpellContext implements Cloneable {
     public static record Display(String name, String description, Path icon) {
     }
     public static class SpellComponent implements Component<EntityStore> {
@@ -128,8 +129,6 @@ public final class SpellContext {
         this.children = children;
 
         for (SpellContext child : this.children) {
-            if (child.parent != null)
-                throw new IllegalArgumentException("SpellContext can't has more than 1 parent");
             child.parent = this;
         }
     }
@@ -183,5 +182,59 @@ public final class SpellContext {
         this.category = category;
         for (SpellContext child : this.children)
             child.setCategory(category);
+    }
+
+    public boolean validate() {
+        try {
+            if (this.getDisplay().name().isBlank())
+                return false;
+            if (this.getDisplay().description().isBlank())
+                return false;
+            if (this.getDisplay().icon().toString().trim().length() < 4)
+                return false;
+            for (SpellField<?> field : this.getSpell().getFields()) {
+                field.fromString(field.asString(this));
+            }
+            return this.spell.validate(this);
+        } catch (Throwable e) {
+            return false;
+        }
+    }
+
+    @Override
+    public SpellContext clone() {
+        SpellContext copy = new SpellContext(this.getSpell(), this.getDisplay(), this.getUuid(), this.fields.clone(), this.getChildren());
+        copy.parent = this.parent;
+        copy.category = this.category;
+        return copy;
+    }
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this)
+            return true;
+        if (obj instanceof SpellContext spell) {
+            if (!this.getSpell().equals(spell.getSpell()))
+                return false;
+            if (!this.getDisplay().equals(spell.getDisplay()))
+                return false;
+            if (!this.getUuid().equals(spell.getUuid()))
+                return false;
+            if (!this.getFieldsData().equals(spell.getFieldsData()))
+                return false;
+            if (!Arrays.equals(this.getChildren(), spell.getChildren()))
+                return false;
+            return spell.parent == this.parent && spell.category == this.category;
+        }
+        return false;
+    }
+
+    public String toString() {
+        return "SpellContext{" +
+                "spell=" +  this.spell.getName() + ", " +
+                "display=" + this.display + ", " +
+                "uuid=" + this.uuid + ", " +
+                "fields=" + this.fields.toJson() + ", " +
+                "children=[" + String.join(", ", Arrays.stream(this.children).map(SpellContext::toString).toList()) + "]" +
+                "}";
     }
 }

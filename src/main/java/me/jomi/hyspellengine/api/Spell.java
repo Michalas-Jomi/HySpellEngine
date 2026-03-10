@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Spell mechanics</br>
@@ -64,6 +65,19 @@ public abstract class Spell {
      * @see Spell#apply(SpellContext, Ref, Store)
      */
     public abstract void unapply(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store);
+
+    /**
+     * Optionally for Override</br>
+     * called after making new spell in admin tool
+     * @param context spell representation in gui
+     * @return true if spell is valid overrise false
+     * @throws Throwable same result as returning false
+     *
+     * @see Spell#requireField(String, Codec, Function, Function)
+     */
+    public boolean validate(SpellContext context) throws Throwable {
+        return true;
+    }
 
     /**
      * Optionally for Override
@@ -189,7 +203,7 @@ public abstract class Spell {
         return extra != null;
     }
 
-    // TODO Predicate<String> validator
+    // TODO fromString should throw any Throwable if value is not valid
     // TODO String description
     // TODO
     /**
@@ -198,6 +212,8 @@ public abstract class Spell {
      *
      * @param name unique key
      * @param codec Codec
+     * @param asString T -> String for getting in admin tool
+     * @param fromString String -> T for setting in admin tool, throw any Throwable if is not valid
      * @return spell field container
      * @param <T> data type
      */
@@ -206,6 +222,9 @@ public abstract class Spell {
         this.fields.put(name, field);
         return field;
     }
+    /**
+     * @see Spell#requireField(String, Codec, Function, Function)
+     */
     protected final <T> SpellField<T> requireField(String name, Codec<T> codec, Function<String, T> fromString) {
         return this.requireField(name, codec, String::valueOf, fromString);
     }
@@ -218,14 +237,46 @@ public abstract class Spell {
     /**
      * @see Spell#requireField(String, Codec, Function, Function)
      */
+    protected final SpellField<String> requireFieldString(String name, Predicate<String> validator) {
+        return this.requireField(name, Codec.STRING, s -> {
+            if (validator.test(s))
+                return s;
+            throw new RuntimeException();
+        });
+    }
+    /**
+     * @see Spell#requireField(String, Codec, Function, Function)
+     */
     protected final SpellField<Integer> requireFieldInt(String name) {
         return this.requireField(name, Codec.INTEGER, Integer::parseInt);
     }
     /**
      * @see Spell#requireField(String, Codec, Function, Function)
      */
+    protected final SpellField<Integer> requireFieldInt(String name, Predicate<Integer> validator) {
+        return this.requireField(name, Codec.INTEGER, s -> {
+            Integer n = Integer.parseInt(s);
+            if (validator.test(n))
+                return n;
+            throw new RuntimeException();
+        });
+    }
+    /**
+     * @see Spell#requireField(String, Codec, Function, Function)
+     */
     protected final SpellField<Double> requireFieldDouble(String name) {
         return this.requireField(name, Codec.DOUBLE, Double::parseDouble);
+    }
+    /**
+     * @see Spell#requireField(String, Codec, Function, Function)
+     */
+    protected final SpellField<Double> requireFieldDouble(String name, Predicate<Double> validator) {
+        return this.requireField(name, Codec.DOUBLE, str -> {
+            Double n = Double.parseDouble(str);
+            if (validator.test(n))
+                return n;
+            throw new RuntimeException();
+        });
     }
     /**
      * @see Spell#requireField(String, Codec, Function, Function)
@@ -264,8 +315,8 @@ public abstract class Spell {
      * @return SpellField registered with requireField
      * @see Spell#requireField(String, Codec, Function, Function)
      */
-    public final SpellField<?> getField(String name) {
-        return this.fields.get(name);
+    public final <T> SpellField<T> getField(String name) {
+        return (SpellField<T>) this.fields.get(name);
     }
 
     /// @return spell Name
