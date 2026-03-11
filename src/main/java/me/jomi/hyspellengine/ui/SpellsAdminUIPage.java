@@ -5,6 +5,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.ui.DropdownEntryInfo;
 import com.hypixel.hytale.server.core.ui.LocalizableString;
 import com.hypixel.hytale.server.core.ui.Value;
@@ -23,7 +24,6 @@ import me.jomi.hyspellengine.core.SpellField;
 import me.jomi.hyspellengine.utils.Adapter;
 import org.bson.BsonDocument;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -35,6 +35,7 @@ import java.util.function.Function;
 // TODO placeholderTexts
 // Spell.description
 
+// TODO bugfix - after add category -> change any category value -> cancel = opened nonexisting category
 public class SpellsAdminUIPage extends SpellsUIPage {
     public SpellsAdminUIPage(@NonNullDecl PlayerRef playerRef) {
         super(playerRef);
@@ -46,23 +47,28 @@ public class SpellsAdminUIPage extends SpellsUIPage {
     public static final String LAYOUT_FIELD_ENUM = "HySpellEngine/Spells/Admin/EnumField.ui";
     public static final String LAYOUT_FIELD_STRING = "HySpellEngine/Spells/Admin/StringField.ui";
     public static final String LAYOUT_FIELD_BOOLEAN = "HySpellEngine/Spells/Admin/BooleanField.ui";
-    public static final String LAYOUT_EXPERIENCE = ""; // TODO
     public static final String LAYOUT_ADD_CATEGORY = "HySpellEngine/Spells/Admin/AddCategoryButton.ui";
-    public static final String LAYOUT_EXPERIENCE_VALUE = "HySpellEngine/Spells/Admin/ExperienceValue.ui";
-    public static final String LAYOUT_EXPERIENCE_VALUES = "HySpellEngine/Spells/Admin/ExperienceValues.ui";
-    public static final String LAYOUT_EXPERIENCE_LEVEL = "HySpellEngine/Spells/Admin/ExperienceLevel.ui";
-    public static final String LAYOUT_EXPERIENCE_LEVELS = "HySpellEngine/Spells/Admin/ExperienceLevels.ui";
-    public static final String LAYOUT_EXPERIENCE_EDIT_BUTTON = "HySpellEngine/Spells/Admin/ExperienceEditButton.ui";
 
     public static final Value<?> VALUE_FIELD_LABEL_STYLE = Value.ref(LAYOUT_FIELDS, "FieldLabelStyle");
 
-    protected Experience experience;
 
     private int editedCategoryIndex = -1;
     private Category editedCategory;
     private Category newCategory = null;
     private Category oldSpellCategory;
     private SpellContext spell;
+
+
+    @Override
+    protected void openExperiences(Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events) {
+        Player player = store.getComponent(ref, Player.getComponentType());
+        player.getPageManager().openCustomPage(ref, store, new ExperienceAdminUIPage(this.playerRef));
+    }
+    @Override
+    public void build(@NonNullDecl Ref<EntityStore> ref, @NonNullDecl UICommandBuilder ui, @NonNullDecl UIEventBuilder events, @NonNullDecl Store<EntityStore> store) {
+        HySpellEnginePlugin.debugLog("building spells admin");
+        super.build(ref, ui, events, store);
+    }
 
 
     @Override
@@ -88,7 +94,6 @@ public class SpellsAdminUIPage extends SpellsUIPage {
             this.addCategory(ui, events, this.newCategory, Data.getCategories().length);
         }
     }
-
     @Override
     protected void addSpell(Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events, SpellContext spell, String selector) {
         super.addSpell(ref, store, ui, events, spell, selector);
@@ -100,21 +105,6 @@ public class SpellsAdminUIPage extends SpellsUIPage {
                 .put("SPELL", spell.getUuid().toString())
                 .put("SELECTOR", selector)
         );
-    }
-
-    @Override
-    protected void openExperience(Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events, Experience experience, String selector) {
-        super.openExperience(ref, store, ui, events, experience, selector);
-
-        ui.append(selector.trim(), LAYOUT_EXPERIENCE_EDIT_BUTTON);
-
-        for (CustomUIEventBindingType type : new CustomUIEventBindingType[]{CustomUIEventBindingType.Activating, CustomUIEventBindingType.RightClicking})
-            events.addEventBinding(type, selector + "#ExperienceEditButton", EventData
-                    .of("ACTION", "openExperienceEdit")
-                    .put("EXPERIENCE", experience.getName())
-                    .put("SELECTOR", selector)
-            );
-
     }
 
     @Override
@@ -138,7 +128,6 @@ public class SpellsAdminUIPage extends SpellsUIPage {
         switch (data.action) {
             case "openEditCategory" -> this.handleDataEventOpenEditCategory(ref, store, data);
             case "categoryChange" -> this.handleDataEventCategoryChangeField(ref, store, data);
-            case "openExperienceEdit" -> this.handleDataEventOpenEditExperiences(ref, store, data);
             case "categoryEdit" -> this.handleDataEventCategoryEdit(ref, store, data);
             case "addCategory" -> this.handleDataEventAddCategory(ref, store, data);
 
@@ -149,46 +138,6 @@ public class SpellsAdminUIPage extends SpellsUIPage {
 
             default -> super.handleDataEvent(ref, store, data);
         }
-    }
-
-    private void handleDataEventOpenEditExperiences(Ref<EntityStore> ref, Store<EntityStore> store, SpellsUIEventData data) {
-        Experience experience = Experience.getRegistry().getExperience(data.experience);
-        this.experience = experience;
-
-        UICommandBuilder ui = new UICommandBuilder();
-        UIEventBuilder events = new UIEventBuilder();
-
-        ui.append("#ExperiencesRoot", LAYOUT_EXPERIENCE_VALUES);
-        ui.set("#ExperienceValuesRoot #Description.Text", experience.getInfo());
-        AtomicInteger i = new AtomicInteger(0);
-        experience.forEachValue((value, exp) -> {
-            ui.append("#ExperienceValuesRoot #Values", LAYOUT_EXPERIENCE_VALUE);
-            String selector = "#ExperienceValuesRoot #Values[" + i.getAndIncrement() + "] ";
-
-            ui.set(selector + "#InputKey.Value", value);
-            ui.set(selector + "#InputValue.Value", String.valueOf(exp));
-        });
-
-        ui.append("#ExperiencesRoot", LAYOUT_EXPERIENCE_LEVELS);
-        i.set(0);
-        double lastExp = 0;
-        for (Experience.Level level : experience.getLevels()) {
-            if (level.infinite())
-                break;
-            ui.append("#ExperienceLevelsRoot #Levels", LAYOUT_EXPERIENCE_LEVEL);
-            String selector = "#ExperienceLevelsRoot #Levels[" + i.getAndIncrement() + "] ";
-
-            ui.set(selector + "#FieldLabel.Text", i.get());
-            ui.set(selector + "#Input.Value", String.valueOf(level.exp() - lastExp));
-            lastExp -= level.exp();
-        }
-        if (experience.isInfinite()) {
-            ui.set("#ExperienceLevelsRoot #CheckBox.Value", true);
-            ui.set("#ExperienceLevelsRoot #ExperienceInfinityGroup.Visible", true);
-
-        }
-
-        sendUpdate(ui, events, false);
     }
 
     private void closeEditedCategory() {

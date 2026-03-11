@@ -1,10 +1,62 @@
+$C = "../../../Common.ui";
 $F = "Fields.ui";
 
+@FontSize = 12;
+@Margin = 10;
+
 Group #ExperienceLevelRoot {
-  LayoutMode: Top;
-  $F.@StringField #FieldExperience {
-    @Text = "exp";
-    @WidthLabel = 100;
-    @WidthInput = 300;
+  LayoutMode: Left;
+  Anchor: (Width: 400, Height: 20);
+
+  Group {
+    Anchor: (Width: 20, Left: 0);
+    LayoutMode: Right;
+    Label #FieldLabel {
+      Anchor: (Width: 20, Right: 0);
+      Style: $F.@DisplayLabelStyle;
+    }
+  }
+  Group {
+    Anchor: (Width: 50 - @Margin, Left: @Margin);
+    TextField #InputExperience {
+      Anchor: (Width: 50 - @Margin, Height: 20);
+      PlaceholderText: "exp";
+      Style: (
+        TextColor: #ffffff,
+        FontSize: @FontSize
+      );
+    }
+  }
+  Group {
+    Anchor: (Width: 100 - @Margin, Left: @Margin);
+    TextField #InputSound {
+      Anchor: (Width: 100 - @Margin, Height: 20);
+      PlaceholderText: "Sound";
+      Style: (
+        TextColor: #ffffff,
+        FontSize: @FontSize
+      );
+    }
+  }
+  Group {
+    Anchor: (Width: 210 - @Margin, Left: @Margin);
+    TextField #InputMessage {
+      Anchor: (Width: 210 - @Margin, Height: 20);
+      PlaceholderText: "chat message";
+      Style: (
+        TextColor: #ffffff,
+        FontSize: @FontSize
+      );
+    }
+  }
+  Group {
+    Anchor: (Width: 20);
+    TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+    TooltipText: "Remove";
+    TextButton #InputRemove {
+      Anchor: (Width: 20, Height: 20);
+      Text: "X";
+      Style: $C.@CancelTextButtonStyle;
+    }
   }
 }

@@ -1,6 +1,5 @@
 package me.jomi.hyspellengine.ui;
 
-import com.hypixel.hytale.assetstore.AssetRegistry;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -20,9 +19,8 @@ import me.jomi.hyspellengine.core.SpellContext;
 import me.jomi.hyspellengine.utils.EasyCodec;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /*
 // TODO select list from PREFABS UI
@@ -131,20 +129,14 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         ui.clear("#Container");
         ui.append("#Container", LAYOUT_EXPERIENCE_MAIN);
 
-        List<Experience> experiences = new ArrayList<>();
-        for (Category category : Data.getCategories()) {
-            if (!experiences.contains(category.experience()))
-                experiences.add(category.experience());
-        }
-
-        int i = 0;
-        for (Experience experience : experiences) {
+        AtomicInteger i = new AtomicInteger();
+        Experience.getRegistry().forEach((id, experience) -> {
             if (!experience.isVisible())
-                continue;
+                return;
             ui.append("#Experiences", LAYOUT_EXPERIENCE);
-            String selector = "#Experiences[" + i++ + "] ";
+            String selector = "#Experiences[" + i.getAndIncrement() + "] ";
             this.openExperience(ref, store, ui, events, experience, selector);
-        }
+        });
     }
     protected void openExperience(Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events, Experience experience, String selector) {
         int lvl = experience.getLevel(ref, store);
@@ -163,9 +155,10 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
                 percent = 0;
             else
                 percent = (nextExp - previousExp) / (exp - previousExp);
-            percent *= 100;
-            visibleExp += " (" + ((int) percent) + "%)";
+            visibleExp += " (" + ((int) (percent * 100)) + "%)";
         }
+
+        percent = Math.min(1, Math.max(0, percent));
 
         ui.set(selector + "#ExperienceNameLabel.Text", experience.getName());
         ui.set(selector + "#ExperienceLevelLabel.Text", lvl + " lv");
@@ -202,7 +195,8 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
             throw new IllegalStateException("Unexpected tab value: " + data.tab);
         }
 
-        this.sendUpdate(ui, events, false);
+        if (ui.getCommands().length > 0)
+            this.sendUpdate(ui, events, false);
     }
     protected void handleDataEventSpell(Ref<EntityStore> ref, Store<EntityStore> store, SpellsUIEventData data) {
         SpellContext spell = category.getSpell(UUID.fromString(data.spell));

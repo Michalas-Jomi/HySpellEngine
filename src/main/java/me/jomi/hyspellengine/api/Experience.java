@@ -4,6 +4,9 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.*;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
+import me.jomi.hyspellengine.Data;
 import me.jomi.hyspellengine.HySpellEnginePlugin;
 import me.jomi.hyspellengine.core.ExperienceRegistry;
 import me.jomi.hyspellengine.utils.EasyCodec;
@@ -13,6 +16,7 @@ import org.bson.BsonDouble;
 import org.bson.BsonInt32;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
@@ -20,6 +24,9 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+/**
+ * can be Overridden
+ */
 public class Experience {
     /**
      *
@@ -28,7 +35,7 @@ public class Experience {
      * @param chatMessage chat message to send player on level up
      * @param sound sound to play for player on level up
      */
-    public static record Level(double exp, boolean infinite, @NullableDecl String chatMessage, @NullableDecl String sound) {
+    public static record Level(double exp, boolean infinite, String chatMessage, String sound) {
     }
     public static class ExperienceComponent implements Component<EntityStore> {
         public static final BuilderCodec<ExperienceComponent> CODEC = EasyCodec.create(ExperienceComponent.class);
@@ -112,8 +119,9 @@ public class Experience {
         }
     }
 
-    private final String name;
-    private final String description;
+    protected final String name;
+    protected final String description;
+    protected volatile Object2DoubleMap<String> values = new Object2DoubleOpenHashMap<>();
     private boolean visible = false;
 
     // TODO docs
@@ -203,7 +211,7 @@ public class Experience {
     }
 
     public Level[] getLevels() {
-        return new Level[]{}; // TODO load from admin tool
+        return Data.getLevels(this);
     }
 
     public boolean canReachNextLevel(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store) {
@@ -306,15 +314,29 @@ public class Experience {
         });
         return max.get();
     }
-
     public Set<String> getValues() {
-        return null; // TODO
+        return this.values.keySet();
     }
-    public boolean containsValues(String value) {
-        return true; // TODO
+    public boolean containsValues(String key) {
+        return this.values.containsKey(key);
     }
     public void forEachValue(BiConsumer<String, Double> work) {
-        // TODO
+        this.values.forEach(work);
+    }
+    public double getExp(String key) {
+        return this.getValue(key);
+    }
+    public double getValue(String key) {
+        return this.values.getOrDefault(key, 0);
+    }
+
+    /**
+     * not recommended to use
+     * @param newValues new map of exp values
+     */
+    public void setValues(Map<String, Double> newValues) {
+        this.values.clear();
+        this.values.putAll(newValues);
     }
 
     /// true if Experience has not level cap, configurable in admin-tool

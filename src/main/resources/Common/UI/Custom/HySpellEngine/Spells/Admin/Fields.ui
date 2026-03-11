@@ -59,8 +59,8 @@ $C = "../../../Common.ui";
       );
       PlaceholderText: @Text;
 
-      CollapsedWidth: 140;
-      ExpandedWidth: 140;
+      CollapsedWidth: @WidthInput;
+      ExpandedWidth: @WidthInput;
     }
   }
 }};

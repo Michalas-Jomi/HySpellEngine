@@ -1,25 +1,34 @@
+$C = "../../../Common.ui";
 $F = "Fields.ui";
 
 Group #ExperienceValueRoot {
   LayoutMode: Left;
-  CompactTextField #InputKey {
+  Anchor: (Width: 400, Height: 20);
+  Padding: (Horizontal: 10);
+  TextField #InputKey {
+    Anchor: (Width: 260, Height: 20);
+    PlaceholderText: "key";
     Style: (
       TextColor: #009900,
       FontSize: $F.@FontSize
     );
-    PlaceholderText: "key";
-
-    CollapsedWidth: 200;
-    ExpandedWidth: 200;
   }
-  CompactTextField #InputValue {
+  TextField #InputValue {
+    Anchor: (Width: 100, Height: 20);
+    PlaceholderText: "exp";
     Style: (
       TextColor: #FF9900,
       FontSize: $F.@FontSize
     );
-    PlaceholderText: "exp";
-
-    CollapsedWidth: 200;
-    ExpandedWidth: 200;
+  }
+  Group {
+    Anchor: (Width: 20);
+    TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+    TooltipText: "Remove";
+    TextButton #Remove {
+      Anchor: (Width: 20, Height: 20);
+      Text: "X";
+      Style: $C.@CancelTextButtonStyle;
+    }
   }
 }

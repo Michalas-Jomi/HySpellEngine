@@ -32,10 +32,11 @@ Group #ExperienceLevelsRoot {
   }
   Group #ButtonGroup {
     LayoutMode: Center;
+    Padding: (Horizontal: 10);
     TextButton #AddButton {
       Style: $C.@DefaultTextButtonStyle;
       Text: "Add";
-      Anchor: (Height: 30, Width: 400);
+      Anchor: (Height: 30, Width: 380);
     }
   }
   Group #InfinityGroup {
@@ -54,25 +55,24 @@ Group #ExperienceLevelsRoot {
       }
     }
     Group #ExperienceInfinityGroup {
-      Visible: false;
+      Anchor: (Width: 380, Left: 20);
       LayoutMode: Left;
+      Visible: false;
       Label #LevelLabel {
-        Anchor: (Width: 200);
+        Anchor: (Width: 100);
         Style: (
           TextColor: #009900,
           FontSize: $F.@FontSize
         );
         Text: "Exp per level";
       }
-      CompactTextField #Input {
+      TextField #Input {
+        Anchor: (Width: 280, Height: 20);
+        PlaceholderText: "exp";
         Style: (
-          TextColor: #FF9900,
+          TextColor: #00726A,
           FontSize: $F.@FontSize
         );
-        PlaceholderText: "exp";
-
-        CollapsedWidth: 200;
-        ExpandedWidth: 200;
       }
     }
   }

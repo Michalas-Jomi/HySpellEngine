@@ -5,9 +5,13 @@ import me.jomi.hyspellengine.core.Category;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Data {
     private static Category[] categories = new Category[0];
+    private static Map<String, Experience.Level[]> experiences = new ConcurrentHashMap<>();
     // TODO load experiences levels, not experiences
 
     public static void load() {
@@ -24,6 +28,9 @@ public class Data {
         updateExperienceVisibility();
     }
     private static void load0() {
+        experiences.clear();
+        // experience.setValues()
+
         // TODO
     }
     public static void save() {
@@ -64,6 +71,25 @@ public class Data {
                 .toArray(Category[]::new);
         Data.save();
         updateExperienceVisibility();
+    }
+
+    @NonNullDecl
+    public static Experience.Level[] getLevels(@NonNullDecl Experience experience) {
+        return experiences.computeIfAbsent(experience.getName(), name -> new Experience.Level[0]);
+    }
+    public static void set(Experience experience, Experience.Level[] levels) {
+        experiences.put(experience.getName(), levels);
+        Data.save();
+    }
+    public static void set(Experience experience, String key, double value) {
+        Map<String, Double> values = new HashMap<>();
+        experience.forEachValue(values::put);
+        if (value == 0)
+            values.remove(key);
+        else
+            values.put(key, value);
+        experience.setValues(values);
+        Data.save();
     }
 
     public static void replaceCategory(Category oldCategory, Category newCategory) {

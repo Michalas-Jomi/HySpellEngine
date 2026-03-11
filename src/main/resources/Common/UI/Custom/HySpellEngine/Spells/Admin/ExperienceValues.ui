@@ -2,7 +2,7 @@ $C = "../../../Common.ui";
 
 Group #ExperienceValuesRoot {
   Anchor: (Width: 400, Height: 800, Left: 10);
-  Background: #FF9966;
+  Background: #00CCCC;
   FlexWeight: 1;
   LayoutMode: TopScrolling;
   ScrollbarStyle: $C.@DefaultScrollbarStyle;
@@ -28,13 +28,15 @@ Group #ExperienceValuesRoot {
   }
   Group #Values {
     LayoutMode: Top;
+    Anchor: (Left: 10);
   }
   Group #ButtonGroup {
     LayoutMode: Center;
+    Padding: (Horizontal: 10);
     TextButton #AddButton {
       Style: $C.@DefaultTextButtonStyle;
       Text: "Add";
-      Anchor: (Height: 30, Width: 400);
+      Anchor: (Height: 30, Width: 380);
     }
   }
 }
