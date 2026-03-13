@@ -47,11 +47,11 @@ public class ParticleSpell extends ComponentSpell<ParticleSpell.ParticleSpellCom
 
     public ParticleSpell() {
         super("particle", "spawns particle at player position", ParticleSpellComponent.getComponentType());
-        this.nameField = this.requireFieldString("particle");
-        this.xField = this.requireFieldDouble("x offset");
-        this.yField = this.requireFieldDouble("y offset");
-        this.zField = this.requireFieldDouble("z offset");
-        this.scaleField = this.requireFieldDouble("scale");
+        this.nameField = this.requireFieldString("particle", "Name of particle, be sure its exists");
+        this.xField = this.requireFieldDouble("x offset", "offset of x from player position");
+        this.yField = this.requireFieldDouble("y offset", "offset of y from player position");
+        this.zField = this.requireFieldDouble("z offset", "offset of z from player position");
+        this.scaleField = this.requireFieldDouble("scale", "particle scale, 1 for no scale");
     }
 
     @Override

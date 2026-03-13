@@ -35,12 +35,12 @@ public class StatsSpell extends LeveledSpell {
 
     public StatsSpell() {
         super("Stat", "Increase player stat");
-        this.statField = this.requireFieldEnum("Stat", Stats.class);
-        this.levelsField = this.requireField("levels", Codec.DOUBLE_ARRAY,
+        this.statField = this.requireFieldEnum("Stat", "Statistic to modify", Stats.class);
+        this.levelsField = this.requireField("levels", "per level boosts list\nneeds to contains \"max level\" elements", Codec.DOUBLE_ARRAY,
                 array -> String.join(", ", Arrays.stream(array).mapToObj(String::valueOf).toList()),
                 str -> Arrays.stream(str.split(",")).map(String::trim).mapToDouble(Double::parseDouble).toArray()
         );
-        this.methodField = this.requireFieldEnum("method", StaticModifier.CalculationType.class);
+        this.methodField = this.requireFieldEnum("method", "Method of modify", StaticModifier.CalculationType.class);
     }
 
     @Override

@@ -138,13 +138,7 @@ public class Experience {
     /// return currently level of player, from 0 to up
     public int getLevel(Ref<EntityStore> ref, ComponentAccessor<EntityStore> store) {
         double exp = this.getExp(ref, store);
-        int i = 0;
-        for (Level level : this.getLevels()) { // TODO refactor
-            if (level.infinite() || level.exp() > exp)
-                break;
-            i++;
-        }
-        return i;
+        return this.getLevel(exp);
     }
 
     ///  return max level for experience, configurable from admin tool, -1 if experience is infinite

@@ -14,8 +14,8 @@ import java.util.Collections;
 public class PermissionSpell extends Spell {
     private final SpellField<String> permField;
     public PermissionSpell() {
-        super("Permission", "Give player  permission after learned this spell");
-        this.permField = this.requireFieldString("permission");
+        super("Permission", "Give player permission after learned this spell");
+        this.permField = this.requireFieldString("permission", "permission to gain after learning skill");
     }
 
     @Override

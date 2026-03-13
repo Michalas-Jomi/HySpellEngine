@@ -1,5 +1,6 @@
 package me.jomi.hyspellengine;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import me.jomi.hyspellengine.api.Experience;
 import me.jomi.hyspellengine.core.Category;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
@@ -7,12 +8,10 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Data {
-    private static Category[] categories = new Category[0];
-    private static Map<String, Experience.Level[]> experiences = new ConcurrentHashMap<>();
-    // TODO load experiences levels, not experiences
+    private static volatile Category[] categories = new Category[0];
+    private static volatile Map<String, Experience.Level[]> experiences = new Object2ObjectArrayMap<>();
 
     public static void load() {
         try {

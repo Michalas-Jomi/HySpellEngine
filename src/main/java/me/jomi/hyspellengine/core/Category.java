@@ -5,18 +5,18 @@ import me.jomi.hyspellengine.api.Experience;
 import java.nio.file.Path;
 import java.util.*;
 
-public record Category(Display display, Experience experience, SpellContext root) implements Iterable<SpellContext> {
-    public Category(Display display, Experience experience, SpellContext root) {
-        this.display = display;
-        this.experience = experience;
-        this.root = root;
-
-        this.root.setCategory(this);
-    }
-
+public record Category(Display display, Experience experience, SpellContext root, UUID uuid) implements Iterable<SpellContext> {
     public static record Display(String name, String description, Path icon) {
     }
 
+    public Category(Display display, Experience experience, SpellContext root, UUID uuid) {
+        this.display = display;
+        this.experience = experience;
+        this.root = root;
+        this.uuid = uuid;
+
+        this.root.setCategory(this);
+    }
 
     public SpellContext getSpell(UUID uuid) {
         for (SpellContext spell : this)

@@ -21,10 +21,10 @@ public class TeleportSpell extends RepeatableSpell {
 
     public TeleportSpell() {
         super("teleport to", "repeatable, teleport player to selected location");
-        this.worldField = this.requireFieldString("world");
-        this.xField = this.requireFieldDouble("x offset");
-        this.yField = this.requireFieldDouble("y offset");
-        this.zField = this.requireFieldDouble("z offset");
+        this.worldField = this.requireFieldString("world", "World to teleport");
+        this.xField = this.requireFieldDouble("x", "x cord of position");
+        this.yField = this.requireFieldDouble("y", "y cord of position");
+        this.zField = this.requireFieldDouble("z", "z cord of position");
     }
 
     @Override

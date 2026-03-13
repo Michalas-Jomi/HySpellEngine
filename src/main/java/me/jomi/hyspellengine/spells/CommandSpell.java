@@ -18,7 +18,7 @@ public class CommandSpell extends Spell {
     public CommandSpell() {
         super("command", "dispatch command with console with {player} placeholder as player name");
         this.repeatableField = this.requireFieldBoolean("repeatable");
-        this.cmdField = this.requireFieldString("command");
+        this.cmdField = this.requireFieldString("command", "Command to run as console with {player} placeholder as player name");
     }
 
     @Override

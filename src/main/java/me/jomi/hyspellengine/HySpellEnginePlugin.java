@@ -22,6 +22,7 @@ import me.jomi.hyspellengine.spells.*;
 import me.jomi.hyspellengine.utils.PlayerPacketTracker;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -178,6 +179,9 @@ public class HySpellEnginePlugin extends JavaPlugin {
         return this.experienceRegistry;
     }
 
+    public static String arrayToString(Object[] array) {
+        return "[" + String.join(", ", Arrays.stream(array).map(Object::toString).toList()) + "]";
+    }
     public static void debugLog(Object msg) {
         HySpellEnginePlugin.log("[DEBUG]: \"" + msg + "\"");
     }

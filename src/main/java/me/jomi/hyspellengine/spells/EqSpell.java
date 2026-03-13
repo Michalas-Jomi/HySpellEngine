@@ -22,8 +22,8 @@ public class EqSpell extends Spell {
 
     public EqSpell() {
         super("item", "gives and removed defined items from player inventory");
-        this.toRemoveField = this.requireFieldString("remove"); // list, empty for nothing
-        this.toAddField = this.requireFieldString("give");
+        this.toRemoveField = this.requireFieldString("remove", "Items list to remove separated by space"); // list, empty for nothing
+        this.toAddField = this.requireFieldString("give", "Items list to give separated by space");
     }
 
     @Override

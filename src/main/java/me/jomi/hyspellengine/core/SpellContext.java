@@ -1,5 +1,6 @@
 package me.jomi.hyspellengine.core;
 
+import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
@@ -17,6 +18,7 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.function.Function;
 
 /**
  * Spell representation in gui
@@ -24,6 +26,7 @@ import java.util.UUID;
  *
  * @see Spell
  * @see Spell#getExtra(SpellContext, Ref, Store, String)
+ * @see Spell#requireField(String, String, Codec, Function, Function) 
  */
 public final class SpellContext implements Cloneable {
     public static record Display(String name, String description, Path icon) {

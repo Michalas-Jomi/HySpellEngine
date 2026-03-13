@@ -8,12 +8,13 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import me.jomi.hyspellengine.HySpellEnginePlugin;
 import me.jomi.hyspellengine.core.SpellContext;
 import me.jomi.hyspellengine.core.SpellField;
+import me.jomi.hyspellengine.utils.UIBuilder;
 
 public abstract class LeveledSpell extends Spell {
     protected final SpellField<Integer> maxLevelField;
     public LeveledSpell(String name, String description) {
         super(name, description);
-        this.maxLevelField = this.requireFieldInt("max level");
+        this.maxLevelField = this.requireFieldInt("max level", "Highest skill level");
     }
 
     /**
@@ -74,10 +75,10 @@ public abstract class LeveledSpell extends Spell {
     }
 
     @Override
-    public void build(SpellContext spellContext, Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder ui, UIEventBuilder events, String selector) {
-        super.build(spellContext, ref, store, ui, events, selector);
+    public void build(SpellContext spellContext, Ref<EntityStore> ref, Store<EntityStore> store, UIBuilder ui) {
+        super.build(spellContext, ref, store, ui);
 
-        ui.append(selector + "#SpellRoot", "HySpellEngine/Spells/SpellLevel.ui");
-        ui.set(selector + "#SpellRoot #LevelLabel.Text", this.getLevel(spellContext, ref, store) + "/" + this.maxLevelField.getValue(spellContext));
+        ui.append("#SpellRoot", "HySpellEngine/Spells/SpellLevel.ui");
+        ui.set("#SpellRoot #LevelLabel.Text", this.getLevel(spellContext, ref, store) + "/" + this.maxLevelField.getValue(spellContext));
     }
 }
