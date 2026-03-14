@@ -109,6 +109,11 @@ public class Adapter {
             Adapter.execute(world, runnable);
     }
 
+    public static String formatDouble(double x) {
+        if (x % 1 == 0)
+            return String.valueOf((int) x);
+        return String.valueOf(x);
+    }
 
     public static <T> T cast(Object obj) {
         return (T) obj;

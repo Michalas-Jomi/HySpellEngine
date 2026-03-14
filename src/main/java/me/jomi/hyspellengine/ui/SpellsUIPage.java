@@ -169,13 +169,12 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         double fullExp = experience.getExp(ref, store);
         double nextFullExp = experience.getExpForNextLevel(ref, store);
         double percent = 1;
-
-
         String visibleExp;
-        if (nextFullExp == -1) {
+
+        if (!experience.canReachNextLevel(ref, store)) {
             visibleExp = "MAX";
         } else {
-            double previousFullExp = experience.getExpNeededForLevel(lvl - 1);
+            double previousFullExp = experience.getExpForLevel(lvl);
             double exp = fullExp - previousFullExp;
             double nextExp = nextFullExp - previousFullExp;
 
@@ -226,27 +225,28 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
 
         SpellContext spell = category.getSpell(UUID.fromString(data.spell));
 
-        Experience.ExperienceComponent exp = spell.getCategory().experience().getComponent(ref, store);
+        if (spell.getCategory().experience().getUnspendPoints(ref, store, spell.getCategory()) <= 0)
+            return;
+        if (!spell.isParentLearned(ref, store))
+            return;
+        if (!spell.getSpell().canApply(spell, ref, store))
+            return;
 
-        // if (exp.getUnspendPoints(spell.getCategory().experience()) > 0) // TODO uncomment
-            if (spell.isParentLearned(ref, store) && spell.getSpell().canApply(spell, ref, store)) {
-                String action = " used ";
-                if (!spell.getSpell().has(spell, ref, store)) {
-                    spell.learn(ref, store);
-                    action = " learned ";
-                    // TODO change visibility of children
-                }
+        String action = " used ";
+        if (!spell.getSpell().has(spell, ref, store)) {
+            spell.learn(ref, store);
+            action = " learned ";
+        }
 
-                exp.addSpendPoints(spell.getCategory().experience(), 1);
+        spell.getCategory().experience().addSpendPoints(ref, store, spell.getCategory(), 1);
 
-                spell.getSpell().apply(spell, ref, store);
-                HySpellEnginePlugin.log(playerRef.getUsername() + action + spell.getDisplay().name() + " spell in " + spell.getCategory().display().name());
+        spell.getSpell().apply(spell, ref, store);
+        HySpellEnginePlugin.log(this.playerRef.getUsername() + action + spell.getDisplay().name() + " spell in " + spell.getCategory().display().name());
 
-                UIBuilder ui = this.ui.at(data.selector);
-                ui.clear();
-                ui.append(LAYOUT_SPELL_GROUP);
-                this.addSpell(spell, ui);
-            }
+        UIBuilder ui = this.ui.at(data.selector);
+        ui.clear();
+        ui.append(LAYOUT_SPELL_GROUP);
+        this.addSpell(spell, ui);
     }
 
 

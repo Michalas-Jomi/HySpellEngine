@@ -196,7 +196,7 @@ public abstract class Spell {
     public void setExtra(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, String key, boolean value) {
         this.setExtra(context, ref, store, key, new BsonBoolean(value));
     }
-
+    /// true if it has extra value with this key
     public boolean hasExtra(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store, String key) {
         BsonValue extra = this.getExtra(context, ref, store, key);
         return extra != null;
@@ -268,7 +268,7 @@ public abstract class Spell {
      * @see Spell#requireField(String, String, Codec, Function, Function)
      */
     protected final SpellField<Double> requireFieldDouble(String name, String description) {
-        return this.requireField(name, description, Codec.DOUBLE, Double::parseDouble);
+        return this.requireField(name, description, Codec.DOUBLE, Adapter::formatDouble, Double::parseDouble);
     }
     /**
      * @see Spell#requireField(String, String, Codec, Function, Function)

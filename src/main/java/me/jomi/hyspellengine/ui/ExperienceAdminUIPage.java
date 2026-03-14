@@ -2,13 +2,17 @@ package me.jomi.hyspellengine.ui;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.event.events.player.PlayerChatEvent;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import me.jomi.hyspellengine.Data;
+import me.jomi.hyspellengine.HySpellEnginePlugin;
 import me.jomi.hyspellengine.api.Experience;
+import me.jomi.hyspellengine.utils.Adapter;
 import me.jomi.hyspellengine.utils.UIBuilder;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
@@ -40,6 +44,9 @@ public class ExperienceAdminUIPage extends SpellsUIPage {
         }
         boolean isKeyValid() {
             if (this.key.isBlank())
+                return false;
+
+            if (!ExperienceAdminUIPage.this.experience.keyValidator.test(this.key))
                 return false;
 
             for (ExpValue value : ExperienceAdminUIPage.this.values)
@@ -222,14 +229,28 @@ public class ExperienceAdminUIPage extends SpellsUIPage {
                 if (exp <= 0)
                     return;
 
-                levels[index] = new Experience.Level(
-                        index > 0 ? levels[index - 1].exp() + exp : exp,
-                        level.infinite(),
-                        level.chatMessage(),
-                        level.sound()
-                );
+                double pre = index == 0 ? 0 : levels[index - 1].exp();
+                double diff = exp - (level.exp() - pre);
+                for (int i = index; i < levels.length; i++) {
+                    Experience.Level lvl = levels[i];
+                    levels[i] = new Experience.Level(
+                            lvl.exp() + diff,
+                            lvl.infinite(),
+                            lvl.chatMessage(),
+                            lvl.sound()
+                    );
+                }
                 break;
             case "sound":
+                boolean invalid = SoundEvent.getAssetMap().getIndexOrDefault(data.value, -1) == -1;
+
+                ui.set("#InputSound.Style.TextColor", invalid ? "#FF3300" : "#FFFFFF");
+
+                if (invalid) {
+                    if (level.sound().isBlank())
+                        return;
+                    data.value = "";
+                }
                 levels[index] = new Experience.Level(
                         level.exp(),
                         level.infinite(),
@@ -318,7 +339,7 @@ public class ExperienceAdminUIPage extends SpellsUIPage {
         ui.set("#CheckBox.Value", experience.isInfinite());
         ui.set("#ExperienceInfinityGroup.Visible", experience.isInfinite());
         if (experience.isInfinite()) {
-            ui.set("#Input.Value", "" + experience.getInfinityExp());
+            ui.set("#Input.Value", Adapter.formatDouble(experience.getInfinityExp()));
             ui.set("#Input.Style.TextColor", experience.getInfinityExp() == 0 ? "#FF3300" : "#00726A");
         }
     }
@@ -363,7 +384,7 @@ public class ExperienceAdminUIPage extends SpellsUIPage {
         UIBuilder ui = this.ui.at("#ExperienceLevelsRoot #Levels", index);
 
         ui.set("#FieldLabel.Text", "" + (index + 1));
-        ui.set("#InputExperience.Value", String.valueOf(level.exp() - previousExp));
+        ui.set("#InputExperience.Value", Adapter.formatDouble(level.exp() - previousExp));
         ui.set("#InputSound.Value", level.sound());
         ui.set("#InputMessage.Value", level.chatMessage());
 
@@ -384,7 +405,7 @@ public class ExperienceAdminUIPage extends SpellsUIPage {
 
         ui.set("#InputKey.Value", key);
         if (exp != 0)
-            ui.set("#InputValue.Value", String.valueOf(exp));
+            ui.set("#InputValue.Value", Adapter.formatDouble(exp));
 
         ui.onChange("#InputKey", "valueChangeKey", "SELECTOR", String.valueOf(index));
         ui.onChange("#InputValue", "valueChangeValue", "SELECTOR", String.valueOf(index));

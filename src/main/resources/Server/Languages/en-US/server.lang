@@ -1,0 +1,22 @@
+# placeholders: experience all
+commands.spellsexp.experience.exists = {experience} doesn't exists. Available experiences: {all}
+commands.spellsexp.exp.set.min = experience cannot be below 0
+# placeholders: player experience exp lvl
+commands.spellsexp.exp.set.done = Sets {player} experience {experience} exp to {exp}
+commands.spellsexp.exp.give.min = experience cannot be below 0
+# placeholders: player experience exp lvl give
+commands.spellsexp.exp.give.done = {player} gains {give} exp {experience} Experience he got {exp}xp ({lvl}lvl)
+# placeholders: player experience exp lvl
+commands.spellsexp.exp.show = {player} has {exp} {experience} Experience
+commands.spellsexp.levels.set.min = level cannot be below 0
+# placeholders: experience max
+commands.spellsexp.levels.set.max = {experience} max level is {max}
+# placeholders: player experience exp lvl
+commands.spellsexp.levels.set.done = Sets {player} experience {experience} level to {lvl}
+# placeholders: player experience exp lvl
+commands.spellsexp.levels.give.max = Player {player} has reached maxim level in {experience} Experience ({lvl})
+commands.spellsexp.levels.give.min = level cannot be below 0
+# placeholders: player experience exp lvl give
+commands.spellsexp.levels.give.done = {player} gains {give} levels {experience} Experience he got {lvl} level
+# placeholders: player experience exp lvl
+commands.spellsexp.levels.show = {player} has {lvl} in {experience} Experience

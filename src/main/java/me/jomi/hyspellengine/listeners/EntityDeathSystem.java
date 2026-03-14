@@ -16,12 +16,15 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 public class EntityDeathSystem extends DeathSystems.OnDeathSystem {
     @Override
     public void onComponentAdded(@NonNullDecl Ref<EntityStore> ref, @NonNullDecl DeathComponent deathComponent, @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer) {
-        if (deathComponent.getDeathInfo().getSource() instanceof Player player) {
-            boolean playerKill = commandBuffer.getComponent(ref, Player.getComponentType()) != null;
-            HySpellEnginePlugin.Experiences.combat.addExp(player.getReference(), commandBuffer, playerKill ? 100 : 20);
+        Player player = commandBuffer.getComponent(ref, Player.getComponentType());
+        NPCEntity npc = commandBuffer.getComponent(ref, NPCEntity.getComponentType());
+
+        if (deathComponent.getDeathInfo().getSource() instanceof Player killer) {
+            double exp = HySpellEnginePlugin.Experiences.combat.getValue(player == null ? npc.getRoleName() : "Player");
+            exp = Math.max(exp, HySpellEnginePlugin.Experiences.combat.getValue("*"));
+            HySpellEnginePlugin.Experiences.combat.addExp(killer.getReference(), commandBuffer, exp);
         }
 
-        Player player = commandBuffer.getComponent(ref, Player.getComponentType());
         if (player != null)
             HySpellEnginePlugin.Experiences.dying.addExp(ref, commandBuffer, 1);
     }

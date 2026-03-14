@@ -11,6 +11,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import me.jomi.hyspellengine.api.LeveledSpell;
 import me.jomi.hyspellengine.core.SpellContext;
 import me.jomi.hyspellengine.core.SpellField;
+import me.jomi.hyspellengine.utils.Adapter;
 
 import java.util.Arrays;
 
@@ -37,7 +38,7 @@ public class StatsSpell extends LeveledSpell {
         super("Stat", "Increase player stat");
         this.statField = this.requireFieldEnum("Stat", "Statistic to modify", Stats.class);
         this.levelsField = this.requireField("levels", "per level boosts list\nneeds to contains \"max level\" elements", Codec.DOUBLE_ARRAY,
-                array -> String.join(", ", Arrays.stream(array).mapToObj(String::valueOf).toList()),
+                array -> String.join(", ", Arrays.stream(array).mapToObj(Adapter::formatDouble).toList()),
                 str -> Arrays.stream(str.split(",")).map(String::trim).mapToDouble(Double::parseDouble).toArray()
         );
         this.methodField = this.requireFieldEnum("method", "Method of modify", StaticModifier.CalculationType.class);

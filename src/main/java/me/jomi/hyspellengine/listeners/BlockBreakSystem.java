@@ -13,37 +13,37 @@ import me.jomi.hyspellengine.HySpellEnginePlugin;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
+import java.util.Set;
+
 public class BlockBreakSystem extends EntityEventSystem<EntityStore, BreakBlockEvent> {
     public BlockBreakSystem() {
         super(BreakBlockEvent.class);
     }
 
     @Override
-    public void handle(int i, @NonNullDecl ArchetypeChunk<EntityStore> archetypeChunk, @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer, @NonNullDecl BreakBlockEvent breakBlockEvent) {
-        if ("Empty".equals(breakBlockEvent.getBlockType().getId()))
+    public void handle(int i, @NonNullDecl ArchetypeChunk<EntityStore> archetypeChunk, @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer, @NonNullDecl BreakBlockEvent event) {
+        if ("Empty".equals(event.getBlockType().getId()))
             return;
 
         Ref<EntityStore> ref = archetypeChunk.getReferenceTo(i);
 
-        double mining = 0;
-        double farming = 0;
 
-        if (breakBlockEvent.getBlockType().getGroup() != null)
-            switch (breakBlockEvent.getBlockType().getGroup()) {
-                case "Gravel":
-                case "Grass":
-                    mining = 1;
-                    break;
-                case "Stone":
-                    mining = 2;
-                    break;
-                case "Wood":
-                    farming = 1;
-                    break;
-            }
+        String group = event.getBlockType().getGroup() != null ? "#" + event.getBlockType().getGroup() : null;
+        String id = event.getBlockType().getId();
 
-        if (breakBlockEvent.getBlockType().getFarming() != null) {
-            farming += 20;
+        double mining;
+        double farming;
+        if (group != null) {
+            mining = HySpellEnginePlugin.Experiences.mining.findBest(Set.of(group, id, "*")::contains);
+            farming = HySpellEnginePlugin.Experiences.farming.findBest(Set.of(group, id)::contains);
+        } else {
+            mining = HySpellEnginePlugin.Experiences.mining.findBest(Set.of(id, "*")::contains);
+            farming = HySpellEnginePlugin.Experiences.farming.getValue(id);
+        }
+
+        if (event.getBlockType().getFarming() != null) {
+            // how to use it better with cur block grow state
+            farming = Math.max(farming, HySpellEnginePlugin.Experiences.farming.getValue("*"));
         }
 
         if (mining != 0)

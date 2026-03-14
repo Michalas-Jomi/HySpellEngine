@@ -29,6 +29,7 @@ public class Data {
     private static void load0() {
         experiences.clear();
         // experience.setValues()
+        // experience.onLoad();
 
         // TODO
     }
@@ -79,6 +80,7 @@ public class Data {
     public static void set(Experience experience, Experience.Level[] levels) {
         experiences.put(experience.getName(), levels);
         Data.save();
+        experience.onLoad();
     }
     public static void set(Experience experience, String key, double value) {
         Map<String, Double> values = new HashMap<>();
@@ -89,6 +91,7 @@ public class Data {
             values.put(key, value);
         experience.setValues(values);
         Data.save();
+        experience.onLoad();
     }
 
     public static void replaceCategory(Category oldCategory, Category newCategory) {

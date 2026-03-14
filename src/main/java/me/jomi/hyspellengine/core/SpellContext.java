@@ -17,6 +17,8 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -38,65 +40,28 @@ public final class SpellContext implements Cloneable {
             return HySpellEnginePlugin.getInstance().getComponentType(SpellComponent.class);
         }
 
-        //     spells   spellContext  extra
-        // Map<String, Map<UUID, Map<String, BsonValue>>>
-        @EasyCodec.ForCodec public BsonDocument spells = new BsonDocument();
-
-        @NullableDecl
-        public BsonDocument getSpellMap(Spell spell) {
-            if (this.spells.containsKey(spell.getName()))
-                return this.spells.get(spell.getName()).asDocument();
-            return null;
-        }
-
-        @NonNullDecl
-        public BsonDocument getOrCreateSpellMap(Spell spell) {
-            BsonDocument bson = this.getSpellMap(spell);
-            if (bson != null)
-                return bson;
-
-            bson = new BsonDocument();
-            this.spells.put(spell.getName(), bson);
-
-            return bson;
-        }
+        //   spellContext  extra
+        // Map<UUID, Map<String, BsonValue>>
+        @EasyCodec.ForCodec public Map<String, BsonDocument> spells = new HashMap<>();
 
         public void addSpell(@NonNullDecl SpellContext spell, @NullableDecl BsonDocument extra) {
             if (extra == null)
                 extra = new BsonDocument();
 
-            BsonDocument spellMap = this.getOrCreateSpellMap(spell.getSpell());
-            spellMap.put(spell.getUuid().toString(), extra);
+            this.spells.put(spell.getUuid().toString(), extra);
         }
 
         public boolean removeSpell(@NonNullDecl SpellContext spell) {
-            BsonDocument spellMap = this.getSpellMap(spell.getSpell());
-            if (spellMap == null)
-                return false;
-
-            return spellMap.remove(spell.getUuid().toString()) != null;
-        }
-
-        public boolean removeSpell(@NonNullDecl Spell spell) {
-            return this.spells.remove(spell.getName()) != null;
+            return this.spells.remove(spell.getUuid().toString()) != null;
         }
 
         public boolean hasSpell(@NonNullDecl SpellContext spell) {
-            BsonDocument spellMap = this.getSpellMap(spell.getSpell());
-            if (spellMap == null)
-                return false;
-            return spellMap.containsKey(spell.getUuid().toString());
+            return this.spells.containsKey(spell.getUuid().toString());
         }
 
-        public boolean hasSpell(@NonNullDecl Spell spell) {
-            return this.spells.containsKey(spell.getName());
-        }
-
+        @NullableDecl
         private BsonDocument getExtra(@NonNullDecl SpellContext spell) {
-            BsonDocument spellMap = this.getSpellMap(spell.getSpell());
-            if (spellMap == null)
-                return null;
-            return spellMap.get(spell.getUuid().toString()).asDocument();
+            return this.spells.get(spell.getUuid().toString());
         }
 
         public BsonValue getExtra(@NonNullDecl SpellContext spell, String key) {
@@ -111,7 +76,7 @@ public final class SpellContext implements Cloneable {
         @Override
         public Component<EntityStore> clone() {
             SpellComponent copy = new SpellComponent();
-            copy.spells = this.spells.clone();
+            this.spells.forEach((key, extra) -> copy.spells.put(key, extra.clone()));
             return copy;
         }
     }

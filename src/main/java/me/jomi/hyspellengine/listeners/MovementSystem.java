@@ -15,6 +15,7 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import me.jomi.hyspellengine.HySpellEnginePlugin;
+import me.jomi.hyspellengine.api.Experience;
 import me.jomi.hyspellengine.utils.Adapter;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
@@ -26,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MovementSystem extends EntityTickingSystem<EntityStore> {
     private static record PlayerRefExp(PlayerRef player, double exp) {}
+    private static final Experience EXPERIENCE = HySpellEnginePlugin.Experiences.moving;
     private static final Map<UUID, Double> map = new ConcurrentHashMap<>();
     public static ScheduledFuture<?> task;
 
@@ -39,17 +41,22 @@ public class MovementSystem extends EntityTickingSystem<EntityStore> {
         MovementStates move = store.getComponent(ref, MovementStatesComponent.getComponentType()).getMovementStates();
         PlayerRef player = store.getComponent(ref, PlayerRef.getComponentType());
 
-        double exp;
-        if (move.jumping)
-            exp = 5;
-        else if (move.sprinting)
-            exp = 2;
-        else if (move.walking)
-            exp = 1;
-        else
-            return;
 
-        map.merge(player.getUuid(), exp * v, Double::sum);
+        double exp = 0;
+        if (move.walking)
+            exp += EXPERIENCE.getValue("walking");
+        if (move.running)
+            exp += EXPERIENCE.getValue("running");
+        if (move.sprinting)
+            exp += EXPERIENCE.getValue("sprinting");
+        if (move.jumping)
+            exp += EXPERIENCE.getValue("jumping");
+        if (move.swimming)
+            exp += EXPERIENCE.getValue("swimming");
+
+
+        if (exp != 0)
+            map.merge(player.getUuid(), exp * v, Double::sum);
     }
 
     private static void giveExp() {

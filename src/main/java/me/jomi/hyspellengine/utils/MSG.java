@@ -31,4 +31,8 @@ public class MSG extends Exception {
         this.params.forEach(msg::param);
         return msg;
     }
+    public Message make(String location) {
+        Message message = Message.translation(location + this.location);
+        return this.applyParams(message);
+    }
 }

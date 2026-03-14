@@ -14,6 +14,7 @@ import com.hypixel.hytale.server.npc.NPCPlugin;
 import me.jomi.hyspellengine.api.Experience;
 import me.jomi.hyspellengine.commands.SpellsAdminCommand;
 import me.jomi.hyspellengine.commands.SpellsCommand;
+import me.jomi.hyspellengine.commands.SpellsExpCommand;
 import me.jomi.hyspellengine.core.ExperienceRegistry;
 import me.jomi.hyspellengine.core.SpellContext;
 import me.jomi.hyspellengine.core.SpellRegistry;
@@ -40,7 +41,7 @@ public class HySpellEnginePlugin extends JavaPlugin {
         // TODO update listeners to exp
         public static final Experience combat = new Experience(
                 "Combat",
-                "Role name\n* for everything\nPlayer for players",
+                "NPC Role name\nPlayer for players\n* for everything",
                 str -> {
             if ("*".equals(str))
                 return true;
@@ -50,39 +51,39 @@ public class HySpellEnginePlugin extends JavaPlugin {
         });
         public static final Experience mining = new Experience(
                 "Mining",
-                "block id or block group name\n* for everything",
+                "block id like: Ore_Cobalt_Slate\n#block group name like: #Stone\n* for everything",
                 str -> {
                     if ("*".equals(str))
                         return true;
                     if (null != AssetRegistry.getAssetStore(BlockGroup.class).getAssetMap().getAsset(str))
                         return true;
                     return null != AssetRegistry.getAssetStore(BlockType.class).getAssetMap().getAsset(str);
+                }
+        );
+        public static final Experience farming = new Experience("Farming",
+                "same syntax as Mining experience\nblock id\n#block group",
+                str -> {
+                    if ("*".equals(str))
+                        return true;
+                    if (null != AssetRegistry.getAssetStore(BlockType.class).getAssetMap().getAsset(str))
+                        return true;
+                    return null != AssetRegistry.getAssetStore(BlockGroup.class).getAssetMap().getAsset(str);
                 }
         );
         public static final Experience moving = new Experience(
                 "Moving",
-                 "moving / sprinting / jumping",
-                Set.of("moving", "sprinting", "jumping")::contains
-        );
-        public static final Experience farming = new Experience("Farming",
-                "block id or block group name\n* for everything farmable",
-                str -> {
-                    if ("*".equals(str))
-                        return true;
-                    if (null != AssetRegistry.getAssetStore(BlockGroup.class).getAssetMap().getAsset(str))
-                        return true;
-                    return null != AssetRegistry.getAssetStore(BlockType.class).getAssetMap().getAsset(str);
-                }
+                 "running / jumping / sprinting / walking / swimming",
+                Set.of("running", "jumping", "sprinting", "walking", "swimming")::contains
         );
         public static final Experience dying = new Experience(
                 "Dying",
-                "any value, used willbe first entry",
-                str -> true
+                "values here will be ignored\n1 death = 1 exp",
+                _ -> true
         );
         public static final Experience any = new Experience(
                 "All",
-                "other experience name",
-                str -> HySpellEnginePlugin.getInstance().getExperienceRegistry().getKeys().contains(str)
+                "other experience name : multiplier\nNo values means all x1",
+                HySpellEnginePlugin.getInstance().getExperienceRegistry().getKeys()::contains
         );
     }
 
@@ -121,6 +122,7 @@ public class HySpellEnginePlugin extends JavaPlugin {
         this.getExperienceRegistry().registerExperience(Experiences.moving);
         this.getExperienceRegistry().registerExperience(Experiences.farming);
         this.getExperienceRegistry().registerExperience(Experiences.dying);
+        this.getExperienceRegistry().registerExperience(Experiences.any);
     }
 
     private void registerSpells() {
@@ -138,11 +140,15 @@ public class HySpellEnginePlugin extends JavaPlugin {
         this.getEntityStoreRegistry().registerSystem(new EntityDeathSystem());
         this.getEntityStoreRegistry().registerSystem(new BlockBreakSystem());
         this.getEntityStoreRegistry().registerSystem(new MovementSystem());
+
+        this.getEntityStoreRegistry().registerSystem(new ExperienceChangeEventSystem());
+        this.getEntityStoreRegistry().registerSystem(new LevelUpEventSystem());
     }
 
     private void registerCommands() {
         this.getCommandRegistry().registerCommand(new SpellsCommand());
         this.getCommandRegistry().registerCommand(new SpellsAdminCommand());
+        this.getCommandRegistry().registerCommand(new SpellsExpCommand());
     }
 
     private Map<Class<? extends Component<EntityStore>>, ComponentType<EntityStore, ? extends Component<EntityStore>>> componentTypeMap = new HashMap<>();

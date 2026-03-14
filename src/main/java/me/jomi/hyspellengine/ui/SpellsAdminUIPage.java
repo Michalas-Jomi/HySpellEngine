@@ -222,14 +222,15 @@ public class SpellsAdminUIPage extends SpellsUIPage {
                             this.spell,
                             this.newCategory.uuid()
                     );
-                    if (this.validateNewCategory())
-                        Data.addCategory(this.newCategory);
-                    else {
+                    if (!this.validateNewCategory()) {
                         playerRef.sendMessage(Message.raw("Invalid data in category or root spell"));
                         return;
                     }
+                    Data.addCategory(this.newCategory);
                     super.category = this.newCategory;
                     this.newCategory = null;
+                    this.editedCategoryIndex = -1;
+
                 } else
                     throw new RuntimeException("Unknown category to save");
                 break;
