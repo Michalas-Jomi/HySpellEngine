@@ -483,4 +483,11 @@ public class Experience {
     public static ExperienceRegistry getRegistry() {
         return HySpellEnginePlugin.getInstance().getExperienceRegistry();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Experience exp)
+            return this.getName().equals(exp.getName()); // name Must be unique
+        return false;
+    }
 }

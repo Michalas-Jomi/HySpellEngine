@@ -28,7 +28,7 @@ import java.util.function.Function;
  *
  * @see Spell
  * @see Spell#getExtra(SpellContext, Ref, Store, String)
- * @see Spell#requireField(String, String, Codec, Function, Function) 
+ * @see Spell#requireField(String, String, Codec, Function, Function)
  */
 public final class SpellContext implements Cloneable {
     public static record Display(String name, String description, Path icon) {
@@ -191,11 +191,12 @@ public final class SpellContext implements Cloneable {
                 return false;
             if (!Arrays.equals(this.getChildren(), spell.getChildren()))
                 return false;
-            return spell.parent == this.parent && spell.category == this.category;
+            return true;
         }
         return false;
     }
 
+    @Override
     public String toString() {
         return "SpellContext{" +
                 "spell=" +  this.spell.getName() + ", " +
