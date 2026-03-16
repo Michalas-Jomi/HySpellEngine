@@ -101,7 +101,7 @@ public abstract class Spell {
      * @return true if player can learn this skill, overrise else
      */
     public boolean canApply(SpellContext spellContext, Ref<EntityStore> ref, Store<EntityStore> store) {
-        return this.has(spellContext, ref, store);
+        return !this.has(spellContext, ref, store);
     }
 
     /**

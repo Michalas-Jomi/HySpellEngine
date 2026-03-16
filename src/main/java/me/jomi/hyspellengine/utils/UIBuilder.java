@@ -1,7 +1,6 @@
 package me.jomi.hyspellengine.utils;
 
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
-import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
 import com.hypixel.hytale.server.core.ui.*;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
@@ -17,7 +16,7 @@ import java.util.List;
  * {@code
  * @Override
  * public void build(Ref<EntityStore> ref, UICommandBuilder uiBuilder, UIEventBuilder events, Store<EntityStore> store) {
- *     UIBuilder ui = new UIBuilder(this, uiBuilder, events);
+ *     UIBuilder ui = new UIBuilder(uiBuilder, events);
  *     ui.append(LAYOUT);
  *     ui.onClick("close", "#CloseButton");
  * }
@@ -28,15 +27,13 @@ import java.util.List;
  *     }
  * }}</pre>
  *
- * @param page Page witch Data contains in its codec fields ACTION & @VALUE
  * @param selector Selector in .ui files
- * @param ui Optionally param for InteractiveCustomUIPage.build()
- * @param events Optionally param for InteractiveCustomUIPage.build()
+ * @param ui       Optionally param for InteractiveCustomUIPage.build()
+ * @param events   Optionally param for InteractiveCustomUIPage.build()
  */
-public record UIBuilder(InteractiveCustomUIPage<?> page, String selector, UICommandBuilder ui, UIEventBuilder events) {
-    public UIBuilder(InteractiveCustomUIPage<?> page, String selector, UICommandBuilder ui, UIEventBuilder events) {
+public record UIBuilder(String selector, UICommandBuilder ui, UIEventBuilder events) {
+    public UIBuilder(String selector, UICommandBuilder ui, UIEventBuilder events) {
         this.events = events;
-        this.page = page;
         this.ui = ui;
 
         if (!selector.endsWith(" ") && !selector.isBlank())
@@ -44,11 +41,17 @@ public record UIBuilder(InteractiveCustomUIPage<?> page, String selector, UIComm
 
         this.selector = selector;
     }
-    public UIBuilder(InteractiveCustomUIPage<?> page) {
-        this(page, "", new UICommandBuilder(), new UIEventBuilder());
+    public UIBuilder() {
+        this("", new UICommandBuilder(), new UIEventBuilder());
     }
-    public UIBuilder(InteractiveCustomUIPage<?> page, UICommandBuilder ui, UIEventBuilder events) {
-        this(page, "", ui, events);
+    public UIBuilder(String selector) {
+        this(selector, new UICommandBuilder(), new UIEventBuilder());
+    }
+    public UIBuilder(UICommandBuilder ui) {
+        this("", ui, new UIEventBuilder());
+    }
+    public UIBuilder(UICommandBuilder ui, UIEventBuilder events) {
+        this("", ui, events);
     }
 
     private String selector(String selector) {
@@ -58,7 +61,7 @@ public record UIBuilder(InteractiveCustomUIPage<?> page, String selector, UIComm
         if (selector.startsWith("."))
             return this.selector.trim() + selector;
 
-        return this.selector + selector;
+        return (this.selector + selector).trim();
     }
 
     /**
@@ -78,7 +81,7 @@ public record UIBuilder(InteractiveCustomUIPage<?> page, String selector, UIComm
      * @return new UIBuilder at selected location
      */
     public UIBuilder at(String selector) {
-        return new UIBuilder(this.page, this.selector(selector), this.ui, this.events);
+        return new UIBuilder(this.selector(selector), this.ui, this.events);
     }
 
     /** @see UIBuilder#at(String)  */

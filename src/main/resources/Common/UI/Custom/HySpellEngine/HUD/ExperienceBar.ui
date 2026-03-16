@@ -1,0 +1,38 @@
+Group #ExperienceBarRoot {
+  Anchor: (Bottom: 10);
+  Group {
+    Anchor: (Width: 600, Height: 10);
+    Background: "../Images/ProgressBar.png";
+    ProgressBar #ProgressBar {
+      Anchor: (Width: 600, Height: 10);
+      BarTexturePath: "../Images/ProgressBarFill.png";
+      EffectTexturePath: "../../Common/ProgressBarEffect.png";
+      EffectWidth: 300;
+      EffectHeight: 10;
+      EffectOffset: 5;
+    }
+    Label #LevelLabel {
+      Anchor: (Left: 20, Width: 100, Height: 10);
+      Style: (
+            FontSize: 11,
+            HorizontalAlignment: Start,
+            VerticalAlignment: Center
+      );
+    }
+    Label #NameLabel {
+      Anchor: (Bottom: 0, Width: 100, Height: 10);
+      Style: (
+            FontSize: 12,
+            Alignment: Center
+      );
+    }
+    Label #PercentLabel {
+      Anchor: (Right: 20, Width: 100, Height: 10);
+      Style: (
+            FontSize: 11,
+            HorizontalAlignment: End,
+            VerticalAlignment: Center
+      );
+    }
+  }
+}

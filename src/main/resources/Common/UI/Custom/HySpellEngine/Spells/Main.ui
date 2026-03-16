@@ -4,17 +4,9 @@ $C = "../../Common.ui";
   Style: $C.@DefaultTextButtonStyle;
 };
 
-$C.@PageOverlay { $C.@DecoratedContainer {
-  @CloseButton = true;
-  Anchor: (Width: 1600, Height: 983);
-
-  #Title {
-    $C.@Title #TitleLabel {
-      @Text = "Chose your path";
-    }
-  }
-
-  #Content {
+$C.@PageOverlay { Group {
+  Anchor: (Width: 1700, Height: 983);
+  Group #Content {
     Group #Nav {
         Anchor: (Top: 0, Width: 1500, Height: 30);
         @NavButton #SpellsButton {

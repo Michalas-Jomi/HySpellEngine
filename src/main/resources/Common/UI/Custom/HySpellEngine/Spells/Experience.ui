@@ -1,42 +1,41 @@
 Group #ExperienceRoot {
-  Padding: (Vertical: 10);
+  Padding: (Vertical: 20);
   LayoutMode: Top;
   Group {
     Anchor: (Width: 700, Height: 120);
-    Padding: (Top: 10, Bottom: 10);
-    Background: #1a1a2e(0.95);
+    Padding: (Vertical: 10);
     LayoutMode: Top;
 
     Group {
-      Anchor: (Width: 700, Height: 30);
+      Anchor: (Width: 680, Height: 30);
       Label #ExperienceNameLabel {
         Text: "Experience name";
         Anchor: (Width: 600, Height: 30, Top: 0);
         Style: (
-          FontSize: 14,
+          FontSize: 18,
           TextColor: #ffffff,
-            RenderBold: true,
-            HorizontalAlignment: Center
+          RenderBold: true,
+          HorizontalAlignment: Center
         );
       }
       Label #ExperienceLevelLabel {
         Text: "-1 lv";
-        Anchor: (Width: 50, Height: 30, Right: 0);
+        Anchor: (Width: 400, Height: 30, Right: 0);
         Style: (
-          FontSize: 12,
+          FontSize: 16,
           TextColor: #ffffff,
           HorizontalAlignment: Center
         );
       }
     }
     Group {
-      Anchor: (Width: 700, Height: 60);
+      Anchor: (Width: 680, Height: 40);
       LayoutMode: Center;
       Group {
         Anchor: (Width: 500, Height: 30);
-        Background: "../../Common/ProgressBar.png";
+        Background: "../Images/ProgressBar.png";
         ProgressBar #ProgressBar {
-          BarTexturePath: "../../Common/ProgressBarFill.png";
+          BarTexturePath: "../Images/ProgressBarFill.png";
           EffectTexturePath: "../../Common/ProgressBarEffect.png";
           EffectWidth: 700;
           EffectHeight: 50;
@@ -45,7 +44,7 @@ Group #ExperienceRoot {
       }
     }
     Group {
-      Anchor: (Width: 700, Height: 10);
+      Anchor: (Width: 680, Height: 10);
       LayoutMode: Center;
       Label #ExperienceExpLabel {
         Text: "-1 lv";

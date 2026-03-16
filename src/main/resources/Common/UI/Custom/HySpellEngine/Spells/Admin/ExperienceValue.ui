@@ -3,7 +3,7 @@ $F = "Fields.ui";
 
 Group #ExperienceValueRoot {
   LayoutMode: Left;
-  Anchor: (Width: 400, Height: 20);
+  Anchor: (Width: 400, Height: 20, Top: 3);
   Padding: (Horizontal: 10);
   TextField #InputKey {
     Anchor: (Width: 260, Height: 20);

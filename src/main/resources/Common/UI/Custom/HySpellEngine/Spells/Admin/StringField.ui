@@ -3,15 +3,13 @@ $F = "Fields.ui";
 $F.@Field {
   @Text = "";
   #InputGroup {
-    CompactTextField #Input {
+    TextField #Input {
+      Anchor: (Width: 120);
+      PlaceholderText: @Text;
       Style: (
         TextColor: #ffffff,
         FontSize: $F.@FontSize
       );
-      PlaceholderText: @Text;
-
-      CollapsedWidth: 140;
-      ExpandedWidth: 140;
     }
   }
 }

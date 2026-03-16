@@ -1,25 +1,23 @@
 $C = "../../../Common.ui";
 $F = "Fields.ui";
 
-Group #ExperienceLevelsRoot {
-  Anchor: (Width: 400, Height: 800, Right: 10);
-  Background: #FF6666;
+$C.@Container {
+  Anchor: (Width: 400 + 34, Height: 800 + 38 + 34, Right: 10);
+
+  #Title {
+    $C.@TitleLabel {
+      Text: "Levels";
+    }
+  }
+
+ #Content { Group #ExperienceLevelsRoot {
+  Anchor: (Width: 400, Height: 800);
   FlexWeight: 1;
   LayoutMode: TopScrolling;
   ScrollbarStyle: $C.@DefaultScrollbarStyle;
 
   Group #TitleGroup {
     LayoutMode: Top;
-    Label #Title {
-      Anchor: (Height: 32);
-      Text: "Levels";
-      Style: (
-        FontSize: 18,
-        TextColor: #ffffff,
-        RenderBold: true,
-        HorizontalAlignment: Center
-      );
-    }
     Label #Description {
       Style: (
         FontSize: 16,
@@ -36,7 +34,7 @@ Group #ExperienceLevelsRoot {
     TextButton #AddButton {
       Style: $C.@DefaultTextButtonStyle;
       Text: "Add";
-      Anchor: (Height: 30, Width: 380);
+      Anchor: (Height: 30, Width: 380, Top: 10);
     }
   }
   Group #InfinityGroup {
@@ -76,4 +74,4 @@ Group #ExperienceLevelsRoot {
       }
     }
   }
-}
+}}}

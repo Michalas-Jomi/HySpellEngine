@@ -11,4 +11,17 @@ Group {
     Text: "Category Name";
     TextTooltipStyle: $C.@DefaultTextTooltipStyle;
   }
+  Group #Points {
+    Anchor: (Width: 40, Height: 40, Top: 5, Right: 5);
+    Background: (TexturePath: "../Images/Points.png");
+    LayoutMode: Center;
+    Label #PointsLabel {
+      Style: (
+        TextColor: #ffffff,
+        FontSize: 18,
+        HorizontalAlignment: Center,
+        VerticalAlignment: Center
+      );
+    }
+  }
 }

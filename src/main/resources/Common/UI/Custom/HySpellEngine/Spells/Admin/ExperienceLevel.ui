@@ -6,7 +6,7 @@ $F = "Fields.ui";
 
 Group #ExperienceLevelRoot {
   LayoutMode: Left;
-  Anchor: (Width: 400, Height: 20);
+  Anchor: (Width: 400, Height: 20, Top: 3);
 
   Group {
     Anchor: (Width: 20, Left: 0);

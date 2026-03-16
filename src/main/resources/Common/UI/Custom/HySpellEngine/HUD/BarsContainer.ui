@@ -1,0 +1,7 @@
+Group #ExperienceBarsContainerRoot {
+  Anchor: (Width: 600, Bottom: 150);
+
+  Group #Bars {
+    LayoutMode: Bottom;
+  }
+}

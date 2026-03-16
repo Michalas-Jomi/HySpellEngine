@@ -74,7 +74,7 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
     /// clear -> append -> clear -> work = Failed to apply Custom UI Commands
     protected final void doWithOther(Runnable work) {
         UIBuilder previous = this.ui;
-        this.ui = new UIBuilder(this);
+        this.ui = new UIBuilder();
 
         work.run();
         this.sendUpdate();
@@ -85,13 +85,12 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
 
     @Override
     public void build(@NonNullDecl Ref<EntityStore> ref, @NonNullDecl UICommandBuilder uiBuilder, @NonNullDecl UIEventBuilder events, @NonNullDecl Store<EntityStore> store) {
-        this.ui = new UIBuilder(this, uiBuilder, events);
+        this.ui = new UIBuilder(uiBuilder, events);
 
         ui.append(LAYOUT_MAIN);
         this.openSpells();
         //this.openExperiences();
 
-        ui.onClick("#CloseButton", "close");
         ui.onClick("#SpellsButton", "tab", "TAB", "spells");
         ui.onClick("#ExpButton", "tab", "TAB", "exp");
     }
@@ -114,6 +113,8 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         ui.set("#CategoryButton.TooltipText", category.display().description());
         ui.set("#Icon.AssetPath", category.display().icon().toString().replace('\\', '/'));
 
+        this.updatePoints(category);
+
         ui.onClick("#CategoryButton", "category", "CATEGORY", String.valueOf(index));
     }
     protected void openCategory(Category category) {
@@ -129,14 +130,12 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
 
         UIBuilder uiParent = ui.at("#Parent");
         uiParent.append(LAYOUT_SPELL);
-        uiParent.set("#SpellButton.Text", spell.getDisplay().name());
+        uiParent.set("#TitleLabel.Text", spell.getDisplay().name());
         uiParent.set("#SpellButton.TooltipText", spell.getDisplay().description());
         uiParent.set("#Icon.AssetPath", spell.getDisplay().icon().toString().replace('\\', '/'));
+        uiParent.set("#Lock.Visible", !spell.isParentLearned(ref, store));
         if (!spell.getSpell().canApply(spell, ref, store))
             uiParent.set("#SpellButton.Disabled", true);
-        if (!spell.isParentLearned(ref, store)) {
-            // TODO do something
-        }
 
         uiParent.onClick("#SpellButton", "spell", "SPELL", spell.getUuid().toString(), "SELECTOR", ui.selector());
 
@@ -197,7 +196,7 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
 
     @Override
     public final void handleDataEvent(Ref<EntityStore> ref, Store<EntityStore> store, SpellsUIEventData data) {
-        this.ui = new UIBuilder(this);
+        this.ui = new UIBuilder();
 
         dataEvents.get(data.action).accept(Adapter.cast(this), data);
 
@@ -239,6 +238,7 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         }
 
         spell.getCategory().experience().addSpendPoints(ref, store, spell.getCategory(), 1);
+        this.updatePoints(spell.getCategory());
 
         spell.getSpell().apply(spell, ref, store);
         HySpellEnginePlugin.log(this.playerRef.getUsername() + action + spell.getDisplay().name() + " spell in " + spell.getCategory().display().name());
@@ -249,11 +249,27 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         this.addSpell(spell, ui);
     }
 
+    protected void updatePoints(Category category) {
+        int i = -1;
+        for (Category cat : Data.getCategories()) {
+            i++;
+            if (cat == category)
+                break;
+        }
+        if (i == -1)
+            return;
+
+        int points = category.experience().getUnspendPoints(playerRef.getReference(), playerRef.getReference().getStore(), category);
+
+        UIBuilder ui = this.ui.at("#Categories", i).at("#Points");
+        ui.set(".Visible", points > 0);
+        if (points > 0)
+            ui.set("#PointsLabel.Text", "" + points);
+    }
 
     static {
         bindEvent(SpellsUIPage.class, "category", SpellsUIPage::handleDataEventCategory);
         bindEvent(SpellsUIPage.class, "tab", SpellsUIPage::handleDataEventTab);
         bindEvent(SpellsUIPage.class, "spell", SpellsUIPage::handleDataEventSpell);
-        bindEvent(SpellsUIPage.class, "close", (page, data) -> page.close());
     }
 }

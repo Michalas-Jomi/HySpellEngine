@@ -1,9 +1,10 @@
 Group #SpellLevelRoot {
-  Anchor: (Width: 20, Height: 20, Top: 0, Right: 0);
+  Anchor: (Width: 60, Height: 20, Top: 5, Right: 0);
+  LayoutMode: Right;
 
   Label #LevelLabel {
     Text: "SpellLevel";
-    Anchor: (Height: 20);
+    Anchor: (Height: 60);
     Style: (
       FontSize: 14,
       TextColor: #ffffff,

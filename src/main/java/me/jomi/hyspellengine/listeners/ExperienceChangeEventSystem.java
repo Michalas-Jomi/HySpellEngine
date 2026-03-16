@@ -12,6 +12,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import me.jomi.hyspellengine.HySpellEnginePlugin;
 import me.jomi.hyspellengine.api.Experience;
 import me.jomi.hyspellengine.api.events.ExperienceChangeEvent;
+import me.jomi.hyspellengine.ui.ExperienceHUD;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
@@ -28,21 +29,40 @@ public class ExperienceChangeEventSystem extends EntityEventSystem<EntityStore, 
     public void handle(int i, @NonNullDecl ArchetypeChunk<EntityStore> archetypeChunk, @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer, @NonNullDecl ExperienceChangeEvent event) {
         if (event.getMethod() != ExperienceChangeEvent.Method.ADD)
             return;
-
-        Ref<EntityStore> ref = archetypeChunk.getReferenceTo(i); // TODO move ref below ifs
-        PlayerRef player = commandBuffer.getComponent(ref, PlayerRef.getComponentType());
-
-        HySpellEnginePlugin.debugLog("[Event] " + player.getUsername() + " gained " + event.getExp() + " xp for " + event.getExperience().getName());
-
-        if (event.getExperience() == ANY)
-            return;
         if (event.isCancelled())
             return;
+
+        // HUD section
+        Ref<EntityStore> ref = archetypeChunk.getReferenceTo(i);
+        Experience experience = event.getExperience();
+        int lvl = experience.getLevel(ref, commandBuffer);
+
+        if (lvl != experience.getMaxLevel() && experience.isVisible()) {
+            double playerLvlExp = experience.getExpForLevel(lvl);
+            double playerExp = experience.getExp(ref, commandBuffer) + event.getExp();
+
+            ExperienceHUD.modify(
+                    ref,
+                    commandBuffer,
+                    experience,
+                    lvl,
+                    (float) ((playerExp - playerLvlExp)
+                            /
+                            (experience.getExpForLevel(lvl + 1) - playerLvlExp))
+            );
+        }
+
+
+
+        // Experiences.ANY section
+        if (event.getExperience() == ANY)
+            return;
+
 
         double exp = event.getExp();
 
         if (!ANY.getValues().isEmpty()) {
-            String name = event.getExperience().getName();
+            String name = experience.getName();
             exp *= ANY.containsValue(name) ? ANY.getValue(name) : 0;
         }
 

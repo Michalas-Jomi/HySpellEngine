@@ -5,7 +5,7 @@ $C = "../../Common.ui";
 @DefaultButtonDefaultBackground = PatchStyle(TexturePath: "../Images/SpellDefault.png", VerticalBorder: @ButtonBorder, HorizontalBorder: @ButtonBorder);
 @DefaultButtonHoveredBackground = PatchStyle(TexturePath: "../Images/SpellHovered.png", VerticalBorder: @ButtonBorder, HorizontalBorder: @ButtonBorder);
 @DefaultButtonPressedBackground = PatchStyle(TexturePath: "../Images/SpellPressed.png", VerticalBorder: @ButtonBorder, HorizontalBorder: @ButtonBorder);
-@DefaultButtonDisabledBackground = PatchStyle(TexturePath: "../Images/SpellDisabled.png", VerticalBorder: @ButtonBorder, HorizontalBorder: @ButtonBorder);
+@DefaultButtonDisabledBackground = PatchStyle(TexturePath: "../Images/SpellLearned.png", VerticalBorder: @ButtonBorder, HorizontalBorder: @ButtonBorder);
 
 @LabelStyle = LabelStyle(
   ...$C.@DefaultButtonLabelStyle,
@@ -20,8 +20,31 @@ $C = "../../Common.ui";
   Sounds: $C.@ButtonSounds,
 );
 
-Group #SpellRoot {
-  Anchor: (Width: 80, Height: 80, Top: 10);
+$C.@Container #SpellContainer {
+ @TitleHeight = 25;
+
+ Anchor: (Top: 10);
+ LayoutMode: Top;
+
+  #Title {
+    Padding: (Top: 2);
+    LayoutMode: Center;
+    Anchor: (Width: 100);
+    Label #TitleLabel {
+      Text: "Lorem ipsum";
+      Style: (
+        TextColor: #33FFCC,
+        FontSize: 13
+      );
+    }
+  }
+
+ #Content {
+ Anchor: (Width: 100, Height: 100);
+ Padding: (Full: 10);
+
+ Group #SpellRoot {
+  Anchor: (Width: 80, Height: 80);
   AssetImage #Icon {
     Anchor: (Width: 80, Height: 80);
   }
@@ -29,6 +52,12 @@ Group #SpellRoot {
     Anchor: (Width: 80, Height: 80);
     Style: @TextButtonStyle;
     TextTooltipStyle: $C.@DefaultTextTooltipStyle;
-    Text: "Spell";
   }
-}
+  Group #Lock {
+    Background: #000000(0.5);
+    AssetImage {
+      Anchor: (Width: 80, Height: 80);
+      AssetPath: "UI/Custom/HySpellEngine/Images/Lock.png";
+    }
+  }
+}}}

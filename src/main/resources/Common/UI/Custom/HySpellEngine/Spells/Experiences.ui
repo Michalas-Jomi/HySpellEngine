@@ -1,11 +1,19 @@
 $C = "../../Common.ui";
 
 Group #ExperiencesRoot {
+  $C.@DecoratedContainer {
+    @TitleHeight = 10;
+
+    Anchor: (Width: 700 + 34 + 13, Height: 800 + 38 + 5);
+
+  #Content {
   Group #Experiences {
-    Anchor: (Width: 700, Height: 800);
+    Anchor: (Width: 700 + 13, Height: 800);
 
     FlexWeight: 1;
     LayoutMode: TopScrolling;
     ScrollbarStyle: $C.@DefaultScrollbarStyle;
+  }
+  }
   }
 }

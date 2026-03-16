@@ -1,6 +1,6 @@
 $C = "../../../Common.ui";
 
-@FontSize = 14;
+@FontSize = 13;
 @DefaultButtonLabelStyle = LabelStyle(
   FontSize: @FontSize,
   TextColor: #bfcdd5,
@@ -32,8 +32,8 @@ $C = "../../../Common.ui";
 
 @Field = Group {
   @Text = "";
-  @WidthLabel = 60;
-  @WidthInput = 140;
+  @WidthLabel = 80;
+  @WidthInput = 120;
 
   LayoutMode: Left;
   Anchor: (Width: @WidthLabel + @WidthInput, Height: 20);

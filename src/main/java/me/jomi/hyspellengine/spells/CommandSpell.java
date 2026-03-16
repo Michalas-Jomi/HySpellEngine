@@ -34,6 +34,6 @@ public class CommandSpell extends Spell {
 
     @Override
     public boolean canApply(SpellContext spellContext, Ref<EntityStore> ref, Store<EntityStore> store) {
-        return this.repeatableField.getValue(spellContext);
+        return this.repeatableField.getValue(spellContext) || super.canApply(spellContext, ref, store);
     }
 }
