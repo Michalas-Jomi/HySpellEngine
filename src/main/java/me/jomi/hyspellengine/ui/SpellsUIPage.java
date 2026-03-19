@@ -12,6 +12,8 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import me.jomi.hyspellengine.Data;
 import me.jomi.hyspellengine.HySpellEnginePlugin;
 import me.jomi.hyspellengine.api.Experience;
+import me.jomi.hyspellengine.api.events.SpellApplyEvent;
+import me.jomi.hyspellengine.api.events.SpellLearnEvent;
 import me.jomi.hyspellengine.core.Category;
 import me.jomi.hyspellengine.core.SpellContext;
 import me.jomi.hyspellengine.utils.Adapter;
@@ -231,17 +233,20 @@ public class SpellsUIPage extends InteractiveCustomUIPage<SpellsUIPage.SpellsUIE
         if (!spell.getSpell().canApply(spell, ref, store))
             return;
 
-        String action = " used ";
-        if (!spell.getSpell().has(spell, ref, store)) {
-            spell.learn(ref, store);
-            action = " learned ";
-        }
+        SpellApplyEvent event = spell.getSpell().has(spell, ref, store) ? new SpellApplyEvent(spell) : new SpellLearnEvent(spell);
+
+        store.invoke(ref, event);
+        if (event.isCancelled())
+            return;
 
         spell.getCategory().experience().addSpendPoints(ref, store, spell.getCategory(), 1);
         this.updatePoints(spell.getCategory());
 
+        if (event instanceof SpellLearnEvent)
+            spell.learn(ref, store);
         spell.getSpell().apply(spell, ref, store);
-        HySpellEnginePlugin.log(this.playerRef.getUsername() + action + spell.getDisplay().name() + " spell in " + spell.getCategory().display().name());
+
+        HySpellEnginePlugin.log(this.playerRef.getUsername() + (event instanceof SpellLearnEvent ? " learned " : " used ") + spell.getDisplay().name() + " spell in " + spell.getCategory().display().name());
 
         UIBuilder ui = this.ui.at(data.selector);
         ui.clear();

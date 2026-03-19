@@ -37,8 +37,6 @@ import java.util.logging.Level;
  */
 public class HySpellEnginePlugin extends JavaPlugin {
     public static class Experiences {
-        // TODO cancelable expGiveEvent
-        // TODO update listeners to exp
         public static final Experience combat = new Experience(
                 "Combat",
                 "NPC Role name\nPlayer for players\n* for everything",

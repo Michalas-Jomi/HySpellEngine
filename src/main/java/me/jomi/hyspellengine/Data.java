@@ -62,9 +62,7 @@ public class Data {
         int le = in.readShort();
         List<Category> categoryList = new ArrayList<>();
         for (int i = 0; i < le; i++) {
-            HySpellEnginePlugin.debugLog("loading category...");
             Category category = loadCategory(in);
-            HySpellEnginePlugin.debugLog("loaded category " + category);
             if (category != null)
                 categoryList.add(category);
         }

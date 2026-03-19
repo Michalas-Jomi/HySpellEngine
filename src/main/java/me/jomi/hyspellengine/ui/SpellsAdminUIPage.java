@@ -30,9 +30,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-// TODO Doubles with .0 display as Int
-
-// TODO bugfix - after add category -> change any category value -> cancel = opened nonexisting category
 public class SpellsAdminUIPage extends SpellsUIPage {
     public static final String LAYOUT_SPELL = "HySpellEngine/Spells/Admin/Spell.ui";
     public static final String LAYOUT_FIELDS = "HySpellEngine/Spells/Admin/Fields.ui";
@@ -97,6 +94,7 @@ public class SpellsAdminUIPage extends SpellsUIPage {
     protected void addSpell(SpellContext spell, UIBuilder ui) {
         super.addSpell(spell, ui);
 
+        ui.set("#Parent #Lock.Visible", false);
         ui.set("#Parent #SpellButton.Disabled", false);
         ui.onClickRight("#Parent #SpellButton", "spell", "SPELL", spell.getUuid().toString(), "SELECTOR", ui.selector());
     }
@@ -122,7 +120,7 @@ public class SpellsAdminUIPage extends SpellsUIPage {
         ui.append("#DisplayGroup", LAYOUT_FIELD_STRING);
         ui.set("#DisplayGroup[1] #FieldLabel.Text", "Desc");
         ui.set("#DisplayGroup[1] #Input.PlaceholderText", "Description");
-        ui.set("#DisplayGroup[1] #Input.Value", desc);
+        ui.set("#DisplayGroup[1] #Input.Value", desc.replace("\n", "\\n"));
         meta[meta.length - 1] = "Desc";
         ui.onChange("#DisplayGroup[1] #Input", action, meta);
 
@@ -138,7 +136,7 @@ public class SpellsAdminUIPage extends SpellsUIPage {
     private void closeEditedCategory() {
         this.doWithOther(() -> {
             if (this.editedCategoryIndex == -1 || this.editedCategoryIndex >= Data.getCategories().length || this.newCategory != null) {
-                if (super.category == this.newCategory)
+                if (super.category != null && this.newCategory != null && super.category.uuid().equals(this.newCategory.uuid()))
                     super.category = null;
                 this.newCategory = null;
                 this.openSpells();
@@ -264,7 +262,7 @@ public class SpellsAdminUIPage extends SpellsUIPage {
                     this.editedCategory = new Category(
                             new Category.Display(
                                 this.editedCategory.display().name(),
-                                data.value,
+                                data.value.replace("\\n", "\n"),
                                 this.editedCategory.display().icon()
                             ),
                             this.editedCategory.experience(),
@@ -276,7 +274,7 @@ public class SpellsAdminUIPage extends SpellsUIPage {
                             new Category.Display(
                                 this.editedCategory.display().name(),
                                 this.editedCategory.display().description(),
-                                Path.of(data.value.length() > 3 ? data.value : "")
+                                Path.of(data.value.trim().length() > 3 ? data.value.trim() : "")
                             ),
                             this.editedCategory.experience(),
                             this.editedCategory.root(),
@@ -374,7 +372,7 @@ public class SpellsAdminUIPage extends SpellsUIPage {
                     uiField.set("#Input.Value", (boolean) field.getValue(spell));
                 } else if (field.isEnum()) {
                     ui.append("#FieldsGroup", LAYOUT_FIELD_ENUM);
-                    this.buildEnum(spell, field, uiField);
+                    this.buildEnum(this.spell, field, uiField);
                 } else {
                     ui.append("#FieldsGroup", LAYOUT_FIELD_STRING);
                     uiField.set("#Input.PlaceholderText", fieldName);
@@ -507,7 +505,7 @@ public class SpellsAdminUIPage extends SpellsUIPage {
             newChildren[index++] = oldChild;
         }
 
-        newCategory = this.copyFromRoot(this.spell.getCategory(), new SpellContext(
+        Category newCategory = this.copyFromRoot(this.spell.getCategory(), new SpellContext(
                 parent.getSpell(),
                 parent.getDisplay(),
                 parent.getUuid(),
@@ -542,13 +540,13 @@ public class SpellsAdminUIPage extends SpellsUIPage {
             );
             case "Desc" -> display = new SpellContext.Display(
                     display.name(),
-                    data.value,
+                    data.value.replace("\\n", "\n"),
                     display.icon()
             );
             case "Icon" -> display = new SpellContext.Display(
                     display.name(),
                     display.description(),
-                    Path.of(data.value.length() > 3 ? data.value : "") // Assets path <= 3 -> client crash
+                    Path.of(data.value.trim().length() > 3 ? data.value.trim() : "") // Assets path <= 3 -> client crash
             );
         }
 

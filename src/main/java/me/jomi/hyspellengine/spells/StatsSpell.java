@@ -8,25 +8,28 @@ import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntitySta
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.Modifier;
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import me.jomi.hyspellengine.HySpellEnginePlugin;
 import me.jomi.hyspellengine.api.LeveledSpell;
 import me.jomi.hyspellengine.core.SpellContext;
 import me.jomi.hyspellengine.core.SpellField;
 import me.jomi.hyspellengine.utils.Adapter;
 
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 public class StatsSpell extends LeveledSpell {
     public static enum Stats {
-        Health(DefaultEntityStatTypes.getHealth()),
-        Stamina(DefaultEntityStatTypes.getStamina()),
-        Mana(DefaultEntityStatTypes.getMana()),
-        Ammo(DefaultEntityStatTypes.getAmmo()),
-        Oxygen(DefaultEntityStatTypes.getOxygen()),
-        SignatureEnergy(DefaultEntityStatTypes.getSignatureEnergy());
+        Health(DefaultEntityStatTypes::getHealth),
+        Stamina(DefaultEntityStatTypes::getStamina),
+        Mana(DefaultEntityStatTypes::getMana),
+        Ammo(DefaultEntityStatTypes::getAmmo),
+        Oxygen(DefaultEntityStatTypes::getOxygen),
+        SignatureEnergy(DefaultEntityStatTypes::getSignatureEnergy);
 
-        public final int index;
-        Stats(int index) {
-            this.index = index;
+
+        public final Supplier<Integer> indexGetter;
+        Stats(Supplier<Integer> indexGetter) {
+            this.indexGetter = indexGetter;
         }
     }
 
@@ -53,9 +56,10 @@ public class StatsSpell extends LeveledSpell {
 
         EntityStatMap stats = store.getComponent(ref, EntityStatMap.getComponentType());
         stats.putModifier(
-                stat.index,
+                stat.indexGetter.get(),
                 context.getUuid().toString(),
                 new StaticModifier(Modifier.ModifierTarget.MAX, method, (float) boost));
+        HySpellEnginePlugin.debugLog("stats modifier " + stat.indexGetter.get() + " " + stat + " " + method + " " + boost);
     }
     @Override
     public void unapply(SpellContext context, Ref<EntityStore> ref, Store<EntityStore> store) {
@@ -63,7 +67,7 @@ public class StatsSpell extends LeveledSpell {
 
         EntityStatMap stats = store.getComponent(ref, EntityStatMap.getComponentType());
         stats.removeModifier(
-                stat.index,
+                stat.indexGetter.get(),
                 context.getUuid().toString()
         );
     }
