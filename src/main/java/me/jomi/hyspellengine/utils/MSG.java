@@ -10,7 +10,7 @@ public class MSG extends Exception {
     public final String location;
     final Map<String, String> params = new HashMap<>();
     public MSG() {
-        this(null);
+        this("");
     }
     public MSG(String location) {
         this.location = location;

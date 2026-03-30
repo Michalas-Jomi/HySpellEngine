@@ -3,10 +3,9 @@ package me.jomi.hyspellengine.spells;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
-import com.hypixel.hytale.server.core.inventory.MaterialQuantity;
 import com.hypixel.hytale.server.core.inventory.container.CombinedItemContainer;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import it.unimi.dsi.fastutil.shorts.ShortArraySet;
 import me.jomi.hyspellengine.api.Spell;
@@ -33,11 +32,12 @@ public class EqSpell extends Spell {
         this.removeItems(p, this.toRemoveField.getValue(context));
 
         String toAdd = this.toAddField.getValue(context);
-        if (toAdd.isBlank())
+        if (toAdd == null || toAdd.isBlank())
             return;
 
+        CombinedItemContainer inv = InventoryComponent.getCombined(ref.getStore(), ref, InventoryComponent.ARMOR_HOTBAR_UTILITY_STORAGE);
         for (String id : toAdd.split(" ")) {
-            p.getInventory().getCombinedArmorHotbarUtilityStorage().addItemStack(new ItemStack(id));
+            inv.addItemStack(new ItemStack(id));
         }
     }
 
@@ -48,11 +48,12 @@ public class EqSpell extends Spell {
     }
 
     private void removeItems(Player p, String itemList) {
-        if (itemList.isBlank())
+        if (itemList == null || itemList.isBlank())
             return;
 
         List<String> toRemoveNames = List.of(itemList.split(" "));
-        CombinedItemContainer inv = p.getInventory().getCombinedEverything();
+        Ref<EntityStore> ref = p.getReference();
+        CombinedItemContainer inv = InventoryComponent.getCombined(ref.getStore(), ref, InventoryComponent.EVERYTHING);
         Set<Short> toRemove = new ShortArraySet();
         inv.forEach((slot, item) -> {
             if (item != null && toRemoveNames.contains(item.getItemId()))

@@ -39,7 +39,8 @@ public class HySpellEnginePlugin extends JavaPlugin {
     public static class Experiences {
         public static final Experience combat = new Experience(
                 "Combat",
-                "NPC Role name\nPlayer for players\n* for everything",
+                //"NPC Role name\nPlayer for players\n* for everything",
+                "No values, just clearly damage dealt",
                 str -> {
             if ("*".equals(str))
                 return true;
@@ -187,7 +188,7 @@ public class HySpellEnginePlugin extends JavaPlugin {
         return "[" + String.join(", ", Arrays.stream(array).map(Object::toString).toList()) + "]";
     }
     public static void debugLog(Object msg) {
-        HySpellEnginePlugin.log("[DEBUG]: \"" + msg + "\"");
+        //HySpellEnginePlugin.log("[DEBUG]: \"" + msg + "\"");
     }
     public static void log(String msg) {
         LOGGER.at(Level.INFO).log(msg);

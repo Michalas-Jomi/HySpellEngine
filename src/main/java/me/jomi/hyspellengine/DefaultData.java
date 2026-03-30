@@ -5,14 +5,19 @@ import me.jomi.hyspellengine.core.Category;
 import me.jomi.hyspellengine.core.SpellContext;
 import org.bson.BsonDocument;
 
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class DefaultData {
-    public static void makeExampleData() {
-        Data.addCategory(categoryCombat());
+    public static void makeExampleData(Path path) {
+        copyFromJar(HySpellEnginePlugin.getInstance().getFile(), "data.bin", path);
     }
-    private static Category categoryCombat() {
+    public static Category categoryCombat() {
         SpellContext child1 = new SpellContext(
                 Spell.getSpellRegistry().getSpell("Stat"),
                 new SpellContext.Display(
@@ -59,5 +64,24 @@ public class DefaultData {
                 root,
                 UUID.randomUUID()
         );
+    }
+
+    public static void copyFromJar(Path jarPath, String entryName, Path targetPath) {
+        try (JarFile jar = new JarFile(jarPath.toFile())) {
+
+            JarEntry entry = jar.getJarEntry(entryName);
+            if (entry == null)
+                throw new RuntimeException("Entry not found in jar: " + entryName);
+
+            Files.createDirectories(targetPath.getParent());
+
+            try (InputStream in = jar.getInputStream(entry)) {
+                byte[] data = in.readAllBytes();
+                Files.write(targetPath, data);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

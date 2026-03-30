@@ -10,12 +10,13 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import me.jomi.hyspellengine.HySpellEnginePlugin;
 import me.jomi.hyspellengine.api.Spell;
 import me.jomi.hyspellengine.utils.EasyCodec;
-import org.bson.BsonDocument;
-import org.bson.BsonValue;
+import org.bson.*;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +48,9 @@ public final class SpellContext implements Cloneable {
         public void addSpell(@NonNullDecl SpellContext spell, @NullableDecl BsonDocument extra) {
             if (extra == null)
                 extra = new BsonDocument();
+
+            extra.put("SpellClass", new BsonString(spell.getSpell().getClass().getName()));
+            extra.put("SpellAddTime", new BsonInt64(Instant.now().getEpochSecond()));
 
             this.spells.put(spell.getUuid().toString(), extra);
         }

@@ -11,7 +11,7 @@ class DataTest {
     void load() {
         HySpellEnginePlugin.getInstance().setup();
 
-        DefaultData.makeExampleData();
+        Data.addCategory(DefaultData.categoryCombat());
         Category[] categories = Data.getCategories();
         Data.save();
         Data.load();

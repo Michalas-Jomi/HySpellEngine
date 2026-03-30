@@ -25,7 +25,7 @@ import java.util.UUID;
 public class SpellsCommand extends PlayerCommand {
     public SpellsCommand() {
         super("spells", "Open Spells menu");
-        this.requirePermission(HytalePermissions.fromCommand("spells"));
+        //this.requirePermission(HytalePermissions.fromCommand("spells"));
     }
 
     @Override

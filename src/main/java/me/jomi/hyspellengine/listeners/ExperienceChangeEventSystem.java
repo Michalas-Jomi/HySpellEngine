@@ -37,7 +37,10 @@ public class ExperienceChangeEventSystem extends EntityEventSystem<EntityStore, 
         Experience experience = event.getExperience();
         int lvl = experience.getLevel(ref, commandBuffer);
 
-        if (lvl != experience.getMaxLevel() && experience.isVisible()) {
+        if (lvl == experience.getMaxLevel())
+            return;
+
+        if (experience.isVisible()) {
             double playerLvlExp = experience.getExpForLevel(lvl);
             double playerExp = experience.getExp(ref, commandBuffer) + event.getExp();
 
@@ -53,11 +56,9 @@ public class ExperienceChangeEventSystem extends EntityEventSystem<EntityStore, 
         }
 
 
-
         // Experiences.ANY section
         if (event.getExperience() == ANY)
             return;
-
 
         double exp = event.getExp();
 

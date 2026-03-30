@@ -32,9 +32,7 @@ public class Data {
         experiences.clear();
 
         if (Files.notExists(PATH)) {
-            DefaultData.makeExampleData();
-            Data.save();
-            return;
+            DefaultData.makeExampleData(PATH);
         }
 
         try (DataInputStream in = new DataInputStream(Files.newInputStream(PATH))) {
@@ -44,7 +42,7 @@ public class Data {
         }
 
         if (categories.length == 0)  {
-            DefaultData.makeExampleData();
+            DefaultData.makeExampleData(PATH);
             Data.save();
         }
 

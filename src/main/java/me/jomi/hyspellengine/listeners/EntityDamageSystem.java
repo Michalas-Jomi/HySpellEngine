@@ -2,6 +2,7 @@ package me.jomi.hyspellengine.listeners;
 
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.dependency.Dependency;
 import com.hypixel.hytale.component.dependency.Order;
@@ -24,8 +25,11 @@ import java.util.Set;
 public class EntityDamageSystem extends DamageEventSystem {
     @Override
     public void handle(int i, @NonNullDecl ArchetypeChunk<EntityStore> archetypeChunk, @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer, @NonNullDecl Damage damage) {
-        if (damage.getAmount() > 0 && !damage.isCancelled() && damage.getSource() instanceof Player player) {
-            HySpellEnginePlugin.Experiences.combat.addExp(player.getReference(), commandBuffer, 1);
+        if (damage.getAmount() > 0 && !damage.isCancelled() && damage.getSource() instanceof Damage.EntitySource entitySource) {
+            Ref<EntityStore> ref = entitySource.getRef();
+            Player player = commandBuffer.getComponent(ref, Player.getComponentType());
+            if (player != null)
+                HySpellEnginePlugin.Experiences.combat.addExp(player.getReference(), commandBuffer, damage.getAmount());
         }
     }
 
